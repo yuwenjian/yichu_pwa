@@ -1,5 +1,6 @@
 'use client'
 
+import { Fragment } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useOutfit, useDeleteOutfit, useIncrementOutfitUseCount } from '@/lib/hooks/useOutfitsQuery'
 import Card from '@/components/ui/Card'
@@ -81,7 +82,7 @@ export default function OutfitDetailPage() {
   }
 
   return (
-    <>
+    <Fragment>
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="max-w-4xl mx-auto space-y-8 pb-20">
         {/* 顶部按钮 - Editorial风格 */}
@@ -236,6 +237,6 @@ export default function OutfitDetailPage() {
         duration={toast.options.duration}
         onClose={toast.handleClose}
       />
-    </>
+    </Fragment>
   )
 }

@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useMemo, Fragment } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/stores/authStore'
 import { useOutfitsByUser, useDeleteOutfit } from '@/lib/hooks/useOutfitsQuery'
@@ -9,7 +10,6 @@ import PullToRefresh from '@/components/ui/PullToRefresh'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import Toast from '@/components/ui/Toast'
 import { useConfirm, useToast } from '@/hooks/useDialog'
-import { useState, useMemo } from 'react'
 
 export default function OutfitsPage() {
   const router = useRouter()
@@ -82,7 +82,7 @@ export default function OutfitsPage() {
   }
 
   return (
-    <>
+    <Fragment>
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="space-y-8 pb-20">
         {/* 顶部标题 - Editorial风格 */}
@@ -324,6 +324,6 @@ export default function OutfitsPage() {
         duration={toast.options.duration}
         onClose={toast.handleClose}
       />
-    </>
+    </Fragment>
   )
 }

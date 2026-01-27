@@ -12,7 +12,7 @@ import PullToRefresh from '@/components/ui/PullToRefresh'
 import ConfirmDialog from '@/components/ui/ConfirmDialog'
 import Toast from '@/components/ui/Toast'
 import { useConfirm, useToast } from '@/hooks/useDialog'
-import { useState } from 'react'
+import { useState, Fragment } from 'react'
 
 // 预设封面图片列表
 const COVER_IMAGES = [
@@ -123,7 +123,7 @@ export default function WardrobesPage() {
   }
 
   return (
-    <>
+    <Fragment>
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="space-y-8">
         <div className="flex items-center justify-between">
@@ -307,6 +307,6 @@ export default function WardrobesPage() {
         duration={toast.options.duration}
         onClose={toast.handleClose}
       />
-    </>
+    </Fragment>
   )
 }

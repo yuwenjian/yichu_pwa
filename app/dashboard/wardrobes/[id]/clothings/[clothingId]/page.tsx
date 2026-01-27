@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Fragment } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import type { Clothing, Category } from '@/types'
@@ -130,8 +130,8 @@ export default function ClothingDetailPage() {
   }
 
   return (
-    <>
-    <PullToRefresh onRefresh={handleRefresh}>
+    <Fragment>
+      <PullToRefresh onRefresh={handleRefresh}>
       <div className="max-w-3xl mx-auto space-y-8 pb-20">
         {/* 顶部按钮 - Editorial风格 */}
         <div className="flex items-center justify-between">
@@ -284,6 +284,6 @@ export default function ClothingDetailPage() {
         duration={toast.options.duration}
         onClose={toast.handleClose}
       />
-    </>
+    </Fragment>
   )
 }
