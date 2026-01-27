@@ -140,24 +140,27 @@ export default function NewWardrobePage() {
             <label className="block text-sm font-medium text-[var(--gray-900)] mb-3 tracking-wide">
               选择封面（可选）
             </label>
-            <div className="grid grid-cols-3 gap-2 max-h-[400px] overflow-y-auto p-1">
+            <div className="grid grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-2">
               {/* 预设封面 */}
               {COVER_IMAGES.map((image, index) => (
                 <button
                   key={index}
                   type="button"
                   onClick={() => setSelectedAvatar(image)}
-                  className={`aspect-[3/4] rounded-[var(--radius-md)] border-2 transition-all overflow-hidden ${
+                  className={`relative w-full rounded-[var(--radius-md)] border-2 transition-all overflow-hidden ${
                     selectedAvatar === image
-                      ? 'border-[var(--accent)] ring-2 ring-[var(--accent)] ring-opacity-50 scale-[1.02]'
+                      ? 'border-[var(--accent)] ring-2 ring-[var(--accent)] ring-opacity-50'
                       : 'border-[var(--gray-300)] hover:border-[var(--accent-light)]'
                   }`}
-                  style={{ transition: 'all var(--transition-smooth)' }}
+                  style={{ 
+                    paddingBottom: '133%',
+                    transition: 'all var(--transition-smooth)' 
+                  }}
                 >
                   <img
                     src={image}
                     alt={`封面 ${index + 1}`}
-                    className="w-full h-full object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
                 </button>
               ))}
