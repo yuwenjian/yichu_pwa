@@ -82,8 +82,8 @@ export default function OutfitDetailPage() {
 
   return (
     <>
-    <PullToRefresh onRefresh={handleRefresh}>
-      <div className="max-w-4xl mx-auto space-y-8 pb-20">
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="max-w-4xl mx-auto space-y-8 pb-20">
         {/* 顶部按钮 - Editorial风格 */}
         <div className="flex items-center justify-between">
         <Button
@@ -215,7 +215,8 @@ export default function OutfitDetailPage() {
           </div>
         </div>
       </Card>
-    </PullToRefresh>
+        </div>
+      </PullToRefresh>
 
       {/* 对话框和提示 */}
       <ConfirmDialog

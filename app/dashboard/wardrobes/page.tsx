@@ -123,8 +123,9 @@ export default function WardrobesPage() {
   }
 
   return (
-    <PullToRefresh onRefresh={handleRefresh}>
-      <div className="space-y-8">
+    <>
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-8">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs tracking-[0.3em] uppercase text-[var(--accent-dark)] font-medium mb-3">
@@ -285,6 +286,8 @@ export default function WardrobesPage() {
           </div>
         </div>
       </Modal>
+        </div>
+      </PullToRefresh>
 
       {/* 对话框和提示 */}
       <ConfirmDialog
@@ -304,6 +307,6 @@ export default function WardrobesPage() {
         duration={toast.options.duration}
         onClose={toast.handleClose}
       />
-    </PullToRefresh>
+    </>
   )
 }

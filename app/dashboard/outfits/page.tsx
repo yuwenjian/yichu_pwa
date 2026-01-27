@@ -83,8 +83,8 @@ export default function OutfitsPage() {
 
   return (
     <>
-    <PullToRefresh onRefresh={handleRefresh}>
-      <div className="space-y-8 pb-20">
+      <PullToRefresh onRefresh={handleRefresh}>
+        <div className="space-y-8 pb-20">
         {/* 顶部标题 - Editorial风格 */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
@@ -303,7 +303,8 @@ export default function OutfitsPage() {
           ))}
         </div>
       )}
-    </PullToRefresh>
+        </div>
+      </PullToRefresh>
 
       {/* 对话框和提示 */}
       <ConfirmDialog
