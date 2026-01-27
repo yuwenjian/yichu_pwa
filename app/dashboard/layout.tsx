@@ -116,6 +116,30 @@ export default function DashboardLayout({
                     pathname?.startsWith('/dashboard/statistics') ? "w-full" : "w-0 group-hover:w-full"
                   )} />
                 </Link>
+                <Link
+                  href="/dashboard/more"
+                  className={cn(
+                    "relative text-sm font-medium tracking-wide transition-colors duration-300 pb-1 group",
+                    pathname?.startsWith('/dashboard/more') || 
+                    pathname?.startsWith('/dashboard/calendar') ||
+                    pathname?.startsWith('/dashboard/analysis') ||
+                    pathname?.startsWith('/dashboard/compare') ||
+                    pathname?.startsWith('/dashboard/recommendations')
+                      ? "text-[var(--accent-dark)]" 
+                      : "text-[var(--gray-600)] hover:text-[var(--accent-dark)]"
+                  )}
+                >
+                  更多
+                  <span className={cn(
+                    "absolute bottom-0 left-0 h-px bg-[var(--accent)] transition-all duration-300",
+                    pathname?.startsWith('/dashboard/more') ||
+                    pathname?.startsWith('/dashboard/calendar') ||
+                    pathname?.startsWith('/dashboard/analysis') ||
+                    pathname?.startsWith('/dashboard/compare') ||
+                    pathname?.startsWith('/dashboard/recommendations')
+                      ? "w-full" : "w-0 group-hover:w-full"
+                  )} />
+                </Link>
               </div>
             </div>
             <div className="flex items-center space-x-4">

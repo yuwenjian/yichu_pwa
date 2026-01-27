@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { Clothing } from '@/types'
 
@@ -46,6 +46,58 @@ export function useClothings({
 
       if (error) throw error
       return data as Clothing[]
+    },
+  })
+}
+
+// 获取单个衣物详情
+export function useClothing(clothingId: string) {
+  return useQuery({
+    queryKey: ['clothing', clothingId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('clothings')
+        .select('*')
+        .eq('id', clothingId)
+        .single()
+
+      if (error) throw error
+      return data as Clothing
+    },
+    enabled: !!clothingId,
+  })
+}
+
+// 增加衣物使用次数
+export function useIncrementClothingUseCount() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (clothingId: string) => {
+      // 获取当前衣物信息
+      const { data: clothing, error: fetchError } = await supabase
+        .from('clothings')
+        .select('use_count')
+        .eq('id', clothingId)
+        .single()
+
+      if (fetchError) throw fetchError
+
+      // 更新使用次数和最后使用时间
+      const { error: updateError } = await supabase
+        .from('clothings')
+        .update({
+          use_count: (clothing.use_count || 0) + 1,
+          last_used_at: new Date().toISOString(),
+        })
+        .eq('id', clothingId)
+
+      if (updateError) throw updateError
+    },
+    onSuccess: (_, clothingId) => {
+      // 更新缓存
+      queryClient.invalidateQueries({ queryKey: ['clothing', clothingId] })
+      queryClient.invalidateQueries({ queryKey: ['clothings'] })
     },
   })
 }

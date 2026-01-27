@@ -53,6 +53,20 @@ const navItems: NavItem[] = [
       </svg>
     ),
   },
+  {
+    href: '/dashboard/more',
+    label: '更多',
+    icon: (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+      </svg>
+    ),
+    activeIcon: (
+      <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M3 4a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1V4zm0 12a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1v-4zm12-12a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V4zm0 12a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
+      </svg>
+    ),
+  },
 ]
 
 export default function BottomNav() {
@@ -65,7 +79,16 @@ export default function BottomNav() {
       
       <div className="flex items-center justify-around h-16 px-2">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname?.startsWith(item.href + '/'))
+          // 特殊处理"更多"按钮的激活状态
+          const isMoreActive = item.href === '/dashboard/more' && (
+            pathname === '/dashboard/more' ||
+            pathname?.startsWith('/dashboard/calendar') ||
+            pathname?.startsWith('/dashboard/analysis') ||
+            pathname?.startsWith('/dashboard/compare') ||
+            pathname?.startsWith('/dashboard/recommendations')
+          )
+          
+          const isActive = isMoreActive || pathname === item.href || (item.href !== '/dashboard' && item.href !== '/dashboard/more' && pathname?.startsWith(item.href + '/'))
           const Icon = isActive && item.activeIcon ? item.activeIcon : item.icon
 
           return (

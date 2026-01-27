@@ -3,6 +3,7 @@
 import { useEffect, useState, Fragment } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
+import { useClothing, useIncrementClothingUseCount } from '@/lib/hooks/useClothingsQuery'
 import type { Clothing, Category } from '@/types'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
@@ -17,53 +18,48 @@ export default function ClothingDetailPage() {
   const wardrobeId = params.id as string
   const clothingId = params.clothingId as string
 
-  const [clothing, setClothing] = useState<Clothing | null>(null)
+  const { data: clothing, isLoading, refetch } = useClothing(clothingId)
+  const incrementUseCountMutation = useIncrementClothingUseCount()
+  
   const [category, setCategory] = useState<Category | null>(null)
-  const [loading, setLoading] = useState(true)
   
   const confirmDialog = useConfirm()
   const toast = useToast()
 
   useEffect(() => {
-    loadClothingDetail()
-  }, [clothingId])
+    if (clothing?.category_id) {
+      loadCategory(clothing.category_id)
+    }
+  }, [clothing?.category_id])
 
-  const loadClothingDetail = async () => {
-    setLoading(true)
+  const loadCategory = async (categoryId: string) => {
     try {
-      // 获取衣物信息
-      const { data: clothingData, error: clothingError } = await supabase
-        .from('clothings')
+      const { data: categoryData } = await supabase
+        .from('categories')
         .select('*')
-        .eq('id', clothingId)
+        .eq('id', categoryId)
         .single()
 
-      if (clothingError) throw clothingError
-
-      setClothing(clothingData)
-
-      // 获取分类信息
-      if (clothingData.category_id) {
-        const { data: categoryData } = await supabase
-          .from('categories')
-          .select('*')
-          .eq('id', clothingData.category_id)
-          .single()
-
-        if (categoryData) {
-          setCategory(categoryData)
-        }
+      if (categoryData) {
+        setCategory(categoryData)
       }
     } catch (error) {
-      console.error('Error loading clothing:', error)
-      toast.error('加载失败')
-    } finally {
-      setLoading(false)
+      console.error('Error loading category:', error)
     }
   }
 
   const handleRefresh = async () => {
-    await loadClothingDetail()
+    await refetch()
+  }
+
+  const handleRecordWear = async () => {
+    try {
+      await incrementUseCountMutation.mutateAsync(clothingId)
+      toast.success('已记录本次穿搭')
+    } catch (error) {
+      console.error('Error incrementing use count:', error)
+      toast.error('操作失败，请重试')
+    }
   }
 
   const handleDelete = async () => {
@@ -110,7 +106,7 @@ export default function ClothingDetailPage() {
     }
   }
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--primary)]"></div>
@@ -144,6 +140,13 @@ export default function ClothingDetailPage() {
             </span>
           </Button>
           <div className="flex gap-3">
+            <Button
+              variant="primary"
+              onClick={handleRecordWear}
+              isLoading={incrementUseCountMutation.isPending}
+            >
+              记录穿搭
+            </Button>
             <Button
               variant="outline"
               onClick={() => router.push(`/dashboard/wardrobes/${wardrobeId}/clothings/${clothingId}/edit`)}
@@ -181,9 +184,23 @@ export default function ClothingDetailPage() {
 
         {/* 基本信息 - Editorial风格 */}
         <Card className="p-6">
-          <h2 className="text-display text-3xl mb-6 text-[var(--gray-900)]">
+          <h2 className="text-display text-3xl mb-3 text-[var(--gray-900)]">
             {clothing.name || '未命名衣物'}
           </h2>
+          
+          {/* 使用统计 */}
+          <div className="flex items-center gap-6 text-sm text-[var(--gray-600)] mb-6">
+            <span className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+              穿搭 {clothing.use_count || 0} 次
+            </span>
+            {clothing.last_used_at && (
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+                最近穿搭: {new Date(clothing.last_used_at).toLocaleDateString('zh-CN')}
+              </span>
+            )}
+          </div>
           
           <div className="h-px w-24 bg-gradient-to-r from-[var(--accent)] to-transparent mb-6" />
 
@@ -261,6 +278,34 @@ export default function ClothingDetailPage() {
                 <p className="text-editorial text-[var(--gray-900)] flex-1 leading-relaxed">{clothing.notes}</p>
               </div>
             )}
+          </div>
+        </Card>
+
+        {/* 使用提示 - Editorial风格 */}
+        <Card className="p-6 border border-[var(--accent)]/20 bg-gradient-to-br from-[var(--accent)]/5 to-transparent">
+          <div className="flex items-start gap-4">
+            <div className="w-10 h-10 rounded-full bg-[var(--accent)]/10 flex items-center justify-center flex-shrink-0">
+              <svg className="w-5 h-5 text-[var(--accent-dark)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div className="flex-1">
+              <h3 className="text-lg font-medium mb-3 text-[var(--gray-900)]">使用提示</h3>
+              <ul className="space-y-2 text-sm text-[var(--gray-700)]">
+                <li className="flex items-start gap-2">
+                  <span className="text-[var(--accent)] mt-1">•</span>
+                  <span>点击【记录穿搭】可以增加穿搭次数统计</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[var(--accent)] mt-1">•</span>
+                  <span>系统会记录最后一次穿搭的时间</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[var(--accent)] mt-1">•</span>
+                  <span>穿搭统计数据可在统计页面查看分析</span>
+                </li>
+              </ul>
+            </div>
           </div>
         </Card>
       </div>
