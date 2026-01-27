@@ -14,7 +14,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-[#1a1a1a] mb-1.5">
+          <label className="block text-sm font-medium text-[var(--gray-900)] mb-1.5">
             {label}
           </label>
         )}
@@ -22,8 +22,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           ref={ref}
           className={cn(
             'w-full px-4 py-3.5 text-base',
-            'bg-white border-2 border-[var(--gray-300)] rounded-xl',
-            'text-[#1a1a1a] placeholder:text-[#5c5954]',
+            'bg-[var(--background)] border-2 border-[var(--gray-300)] rounded-xl',
+            'text-[var(--gray-900)] placeholder:text-[var(--gray-500)]',
             'focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]',
             'transition-all duration-200',
             'disabled:bg-[var(--gray-100)] disabled:cursor-not-allowed disabled:text-[var(--gray-500)]',
@@ -32,8 +32,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             className
           )}
           style={{ 
-            color: '#1a1a1a',
-            WebkitTextFillColor: '#1a1a1a',
+            color: 'var(--gray-900)',
+            WebkitTextFillColor: 'var(--gray-900)',
             fontSize: '16px', // 防止 iOS 自动缩放
           }}
           {...props}

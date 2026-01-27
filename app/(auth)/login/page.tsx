@@ -48,10 +48,10 @@ export default function LoginPage() {
         <Card variant="elevated" className="p-8">
           {/* Logo/标题区域 */}
           <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>
+            <h1 className="text-4xl font-bold mb-2 text-[var(--gray-900)]" style={{ fontFamily: 'Playfair Display, serif' }}>
               衣橱管理
             </h1>
-            <p className="text-[var(--gray-500)]">登录你的账户</p>
+            <p className="text-[var(--gray-600)] dark:text-[var(--gray-400)]">登录你的账户</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -92,7 +92,7 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-[var(--gray-500)]">
+          <div className="mt-6 text-center text-sm text-[var(--gray-600)] dark:text-[var(--gray-400)]">
             还没有账户？{' '}
             <Link
               href="/register"
