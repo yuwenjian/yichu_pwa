@@ -39,49 +39,6 @@ export default function OutfitCanvasModal({
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF')
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    if (isOpen && canvasRef.current && !fabricCanvasRef.current) {
-      // 获取容器宽度，适配移动端
-      const containerWidth = Math.min(window.innerWidth - 64, 500)
-      
-      // 初始化 Fabric Canvas
-      const canvas = new fabric.Canvas(canvasRef.current, {
-        width: containerWidth,
-        height: containerWidth,
-        backgroundColor: '#FFFFFF',
-      })
-
-      fabricCanvasRef.current = canvas
-
-      // 允许点击外部取消选择
-      canvas.on('selection:cleared', () => {
-        // 可以处理取消选择后的逻辑
-      })
-
-      // 延迟加载图片，确保画布已准备就绪
-      setTimeout(() => {
-        loadClothings(canvas, clothings)
-      }, 200)
-    }
-
-    return () => {
-      if (fabricCanvasRef.current) {
-        fabricCanvasRef.current.dispose()
-        fabricCanvasRef.current = null
-      }
-    }
-  }, [isOpen])
-
-  // 当选中的衣物发生变化时重新加载（如果弹窗已经打开）
-  useEffect(() => {
-    if (isOpen && fabricCanvasRef.current) {
-      const canvas = fabricCanvasRef.current
-      canvas.clear()
-      canvas.setBackgroundColor(backgroundColor, canvas.renderAll.bind(canvas))
-      loadClothings(canvas, clothings)
-    }
-  }, [clothings])
-
   const loadClothings = (canvas: fabric.Canvas, items: Clothing[]) => {
     if (items.length === 0) return
     
@@ -131,6 +88,51 @@ export default function OutfitCanvasModal({
       }, { crossOrigin: 'anonymous' })
     })
   }
+
+  useEffect(() => {
+    if (isOpen && canvasRef.current && !fabricCanvasRef.current) {
+      // 获取容器宽度，适配移动端
+      const containerWidth = Math.min(window.innerWidth - 64, 500)
+      
+      // 初始化 Fabric Canvas
+      const canvas = new fabric.Canvas(canvasRef.current, {
+        width: containerWidth,
+        height: containerWidth,
+        backgroundColor: '#FFFFFF',
+      })
+
+      fabricCanvasRef.current = canvas
+
+      // 允许点击外部取消选择
+      canvas.on('selection:cleared', () => {
+        // 可以处理取消选择后的逻辑
+      })
+
+      // 延迟加载图片，确保画布已准备就绪
+      setTimeout(() => {
+        loadClothings(canvas, clothings)
+      }, 200)
+    }
+
+    return () => {
+      if (fabricCanvasRef.current) {
+        fabricCanvasRef.current.dispose()
+        fabricCanvasRef.current = null
+      }
+    }
+  }, [isOpen, clothings]) // 添加 clothings 依赖
+
+  // 当选中的衣物发生变化时重新加载（如果弹窗已经打开）
+  useEffect(() => {
+    if (isOpen && fabricCanvasRef.current) {
+      const canvas = fabricCanvasRef.current
+      canvas.clear()
+      canvas.setBackgroundColor(backgroundColor, () => {
+        canvas.renderAll()
+      })
+      loadClothings(canvas, clothings)
+    }
+  }, [clothings, backgroundColor, isOpen]) // 添加缺失依赖
 
   const handleSave = () => {
     if (!fabricCanvasRef.current) return
