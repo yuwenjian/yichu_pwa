@@ -115,10 +115,11 @@ export default function OutfitCanvasModal({
         fabricCanvasRef.current = null
       }
     }
-  }, [isOpen, isFabricReady, clothings])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, isFabricReady])
 
   useEffect(() => {
-    if (isOpen && fabricCanvasRef.current) {
+    if (isOpen && fabricCanvasRef.current && clothings.length > 0) {
       const canvas = fabricCanvasRef.current
       canvas.clear()
       canvas.setBackgroundColor(backgroundColor, () => {
@@ -126,6 +127,7 @@ export default function OutfitCanvasModal({
       })
       loadClothings(canvas, clothings)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clothings, backgroundColor, isOpen])
 
   const handleSave = () => {
