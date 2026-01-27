@@ -8,6 +8,10 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
 import Input from '@/components/ui/Input'
+import PullToRefresh from '@/components/ui/PullToRefresh'
+import ConfirmDialog from '@/components/ui/ConfirmDialog'
+import Toast from '@/components/ui/Toast'
+import { useConfirm, useToast } from '@/hooks/useDialog'
 import { useState } from 'react'
 
 // 预设封面图片列表
@@ -50,13 +54,20 @@ const DEFAULT_AVATAR = '/images/image_20260127115359.png'
 export default function WardrobesPage() {
   const router = useRouter()
   const { user } = useAuthStore()
-  const { data: wardrobes = [], isLoading } = useWardrobes(user?.id)
+  const { data: wardrobes = [], isLoading, refetch } = useWardrobes(user?.id)
   const createWardrobeMutation = useCreateWardrobe()
   const deleteWardrobeMutation = useDeleteWardrobe()
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [newWardrobeName, setNewWardrobeName] = useState('')
   const [selectedAvatar, setSelectedAvatar] = useState<string>(DEFAULT_AVATAR)
+
+  const confirmDialog = useConfirm()
+  const toast = useToast()
+
+  const handleRefresh = async () => {
+    await refetch()
+  }
 
   const handleCreateWardrobe = async () => {
     if (!newWardrobeName.trim() || !user?.id) return
@@ -76,7 +87,7 @@ export default function WardrobesPage() {
       router.push(`/dashboard/wardrobes/${newWardrobe.id}`)
     } catch (error) {
       console.error('Error creating wardrobe:', error)
-      alert('创建失败，请重试')
+      toast.error('创建失败，请重试')
     }
   }
 
@@ -84,16 +95,22 @@ export default function WardrobesPage() {
     e.preventDefault() // 阻止链接跳转
     e.stopPropagation()
 
-    if (!confirm(`确定要删除衣橱 ${name} 吗？\n\n删除后衣橱内的所有衣物和分类也将被删除，且无法恢复！`)) {
-      return
-    }
+    const confirmed = await confirmDialog.confirm({
+      title: '删除衣橱',
+      message: `确定要删除衣橱 ${name} 吗？\n\n删除后衣橱内的所有衣物和分类也将被删除，且无法恢复！`,
+      confirmText: '删除',
+      cancelText: '取消',
+      variant: 'danger',
+    })
+
+    if (!confirmed) return
 
     try {
       await deleteWardrobeMutation.mutateAsync(id)
-      alert('删除成功')
+      toast.success('删除成功')
     } catch (error) {
       console.error('Error deleting wardrobe:', error)
-      alert('删除失败，请重试')
+      toast.error('删除失败，请重试')
     }
   }
 
@@ -106,61 +123,82 @@ export default function WardrobesPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-[var(--gray-900)]" style={{ fontFamily: 'Playfair Display, serif' }}>
-          我的衣橱
-        </h1>
-        <Button
-          variant="primary"
-          onClick={() => setIsCreateModalOpen(true)}
-        >
-          + 新建衣橱
-        </Button>
-      </div>
+    <PullToRefresh onRefresh={handleRefresh}>
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-xs tracking-[0.3em] uppercase text-[var(--accent-dark)] font-medium mb-3">
+              MY COLLECTION
+            </p>
+            <h1 className="text-display text-5xl text-[var(--gray-900)]">
+              我的衣橱
+            </h1>
+            <div className="h-px w-24 bg-gradient-to-r from-[var(--accent)] to-transparent mt-4" />
+          </div>
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={() => setIsCreateModalOpen(true)}
+          >
+            + 新建衣橱
+          </Button>
+        </div>
 
       {wardrobes.length === 0 ? (
-        <Card className="text-center py-16">
-          <div className="text-6xl mb-4">👔</div>
-          <h3 className="text-xl font-semibold mb-2 text-[var(--gray-900)]">还没有衣橱</h3>
-          <p className="text-[var(--gray-700)] mb-6">
+        <Card className="text-center py-20 border-dashed">
+          <div className="w-20 h-20 bg-[var(--accent)]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="text-6xl">👔</span>
+          </div>
+          <h3 className="text-2xl font-medium mb-3 text-[var(--gray-900)]">开始你的衣橱之旅</h3>
+          <p className="text-editorial text-lg text-[var(--gray-600)] mb-8 max-w-md mx-auto">
             创建你的第一个衣橱，开始管理你的衣物吧
           </p>
           <Button
             variant="primary"
+            size="lg"
             onClick={() => setIsCreateModalOpen(true)}
           >
             创建衣橱
           </Button>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {wardrobes.map((wardrobe) => (
-            <div key={wardrobe.id} className="relative group">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {wardrobes.map((wardrobe, index) => (
+            <div key={wardrobe.id} className={`relative group animate-fade-in stagger-${Math.min(index + 1, 5)}`}>
               <Link href={`/dashboard/wardrobes/${wardrobe.id}`}>
-                <Card hover className="h-full">
-                  <div className="aspect-video bg-gradient-to-br from-[var(--primary-light)] to-[var(--accent-light)] rounded-lg mb-4 flex items-center justify-center overflow-hidden">
+                <Card hover className="h-full overflow-hidden">
+                  <div className="aspect-[4/3] bg-gradient-to-br from-[var(--gray-100)] to-[var(--gray-200)] rounded-[var(--radius-lg)] mb-5 flex items-center justify-center overflow-hidden relative">
                     {wardrobe.avatar ? (
-                      <img
-                        src={wardrobe.avatar}
-                        alt={wardrobe.name}
-                        className="w-full h-full object-cover"
-                      />
+                      <>
+                        <img
+                          src={wardrobe.avatar}
+                          alt={wardrobe.name}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                      </>
                     ) : (
-                      <div className="text-5xl opacity-50">👔</div>
+                      <div className="text-6xl opacity-30 group-hover:scale-110 transition-transform duration-500">👔</div>
                     )}
                   </div>
-                  <h3 className="text-xl font-semibold mb-1 text-[#1a1a1a]">{wardrobe.name}</h3>
-                  <p className="text-sm text-[#1a1a1a]">
-                    点击查看详情 →
-                  </p>
+                  <div className="space-y-2">
+                    <h3 className="text-xl font-medium text-[var(--gray-900)] group-hover:text-[var(--accent-dark)] transition-colors duration-300">
+                      {wardrobe.name}
+                    </h3>
+                    <div className="h-px w-12 bg-[var(--gray-300)] group-hover:w-20 group-hover:bg-[var(--accent)] transition-all duration-500" />
+                    <p className="text-sm text-[var(--gray-600)] text-editorial flex items-center gap-1">
+                      点击探索
+                      <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
+                    </p>
+                  </div>
                 </Card>
               </Link>
               
               {/* 删除按钮 */}
               <button
                 onClick={(e) => handleDeleteWardrobe(wardrobe.id, wardrobe.name, e)}
-                className="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-700 shadow-lg z-10"
+                className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center bg-[var(--error)] text-white rounded-full opacity-0 group-hover:opacity-100 transition-all hover:bg-[#9a4a4a] hover:scale-110 shadow-[var(--shadow-medium)] z-10"
+                style={{ transition: 'all var(--transition-smooth)' }}
                 title="删除衣橱"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -197,7 +235,7 @@ export default function WardrobesPage() {
           
           {/* 封面选择 */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a] mb-3">
+            <label className="block text-sm font-medium text-[var(--gray-900)] mb-3 tracking-wide">
               选择封面（可选）
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[300px] overflow-y-auto p-1">
@@ -207,11 +245,12 @@ export default function WardrobesPage() {
                   key={index}
                   type="button"
                   onClick={() => setSelectedAvatar(image)}
-                  className={`aspect-video rounded-lg border-2 transition-all overflow-hidden ${
+                  className={`aspect-video rounded-[var(--radius-lg)] border transition-all overflow-hidden ${
                     selectedAvatar === image
-                      ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] ring-opacity-50'
-                      : 'border-gray-300 hover:border-gray-400'
+                      ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]/30 scale-105'
+                      : 'border-[var(--gray-300)] hover:border-[var(--accent-light)]'
                   }`}
+                  style={{ transition: 'all var(--transition-smooth)' }}
                 >
                   <img
                     src={image}
@@ -223,7 +262,7 @@ export default function WardrobesPage() {
             </div>
           </div>
           
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end gap-4 pt-6 border-t border-[var(--gray-200)]">
             <Button
               variant="ghost"
               onClick={() => {
@@ -231,12 +270,12 @@ export default function WardrobesPage() {
                 setNewWardrobeName('')
                 setSelectedAvatar(DEFAULT_AVATAR)
               }}
-              className="!text-[#1a1a1a]"
             >
               取消
             </Button>
             <Button
               variant="primary"
+              size="lg"
               onClick={handleCreateWardrobe}
               isLoading={createWardrobeMutation.isPending}
               disabled={!newWardrobeName.trim()}
@@ -246,6 +285,25 @@ export default function WardrobesPage() {
           </div>
         </div>
       </Modal>
-    </div>
+
+      {/* 对话框和提示 */}
+      <ConfirmDialog
+        isOpen={confirmDialog.isOpen}
+        title={confirmDialog.options.title}
+        message={confirmDialog.options.message}
+        confirmText={confirmDialog.options.confirmText}
+        cancelText={confirmDialog.options.cancelText}
+        variant={confirmDialog.options.variant}
+        onConfirm={confirmDialog.handleConfirm}
+        onCancel={confirmDialog.handleCancel}
+      />
+      <Toast
+        isOpen={toast.isOpen}
+        message={toast.options.message}
+        type={toast.options.type}
+        duration={toast.options.duration}
+        onClose={toast.handleClose}
+      />
+    </PullToRefresh>
   )
 }

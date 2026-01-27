@@ -12,6 +12,8 @@ import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
 import Modal from '@/components/ui/Modal'
 import OutfitCanvasModal from '@/components/outfits/OutfitCanvasModal'
+import Toast from '@/components/ui/Toast'
+import { useToast } from '@/hooks/useDialog'
 import type { Clothing } from '@/types'
 import { supabase } from '@/lib/supabase'
 
@@ -31,6 +33,8 @@ export default function NewOutfitPage() {
   const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null)
   const [isUploading, setIsUploading] = useState(false)
   const [isAddingCustomTag, setIsAddingCustomTag] = useState(false)
+
+  const toast = useToast()
 
   const PRESET_TAGS = ['通勤', '周末', '运动', '聚会']
   const PRESET_SEASONS = ['春', '夏', '秋', '冬']
@@ -122,7 +126,7 @@ export default function NewOutfitPage() {
       }
     } catch (error) {
       console.error('Error uploading canvas image:', error)
-      alert('图片上传失败，请重试')
+      toast.error('图片上传失败，请重试')
     } finally {
       setIsUploading(false)
     }
@@ -130,7 +134,7 @@ export default function NewOutfitPage() {
 
   const handleCreate = async () => {
     if (selectedTags.length === 0 || selectedClothings.length === 0) {
-      alert('请选择至少一个标签并至少选择一件衣物')
+      toast.warning('请选择至少一个标签并至少选择一件衣物')
       return
     }
 
@@ -152,11 +156,13 @@ export default function NewOutfitPage() {
         clothingIds: selectedClothings.map(c => c.id),
       })
 
-      alert('创建成功！')
-      router.push(`/dashboard/outfits/${outfit.id}`)
+      toast.success('创建成功！')
+      setTimeout(() => {
+        router.push(`/dashboard/outfits/${outfit.id}`)
+      }, 500)
     } catch (error) {
       console.error('Error creating outfit:', error)
-      alert('创建失败，请重试')
+      toast.error('创建失败，请重试')
     }
   }
 
@@ -181,28 +187,34 @@ export default function NewOutfitPage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-20">
-      <div>
+    <div className="max-w-4xl mx-auto space-y-8 pb-20">
+      <div className="space-y-4">
         <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="mb-4 !text-white"
+          className="mb-2"
         >
           ← 返回
         </Button>
-        <h1 className="text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
-          创建搭配
-        </h1>
-        <p className="text-white/80 mt-2">
-          从你的衣橱中选择衣物，创建一套完美的搭配
-        </p>
+        <div>
+          <p className="text-xs tracking-[0.3em] uppercase text-[var(--accent-dark)] font-medium mb-3">
+            CREATE YOUR LOOK
+          </p>
+          <h1 className="text-display text-5xl text-[var(--gray-900)] mb-3">
+            创建搭配
+          </h1>
+          <div className="h-px w-24 bg-gradient-to-r from-[var(--accent)] to-transparent mb-4" />
+          <p className="text-editorial text-lg text-[var(--gray-600)]">
+            从你的衣橱中选择衣物，创建一套完美的搭配
+          </p>
+        </div>
       </div>
 
-      <Card className="p-6">
+      <Card className="p-8">
         <div className="space-y-6">
           {/* 选择衣橱 */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a] mb-2">
+            <label className="block text-sm font-medium text-[var(--gray-900)] mb-2 tracking-wide">
               选择衣橱
             </label>
             <select
@@ -211,7 +223,7 @@ export default function NewOutfitPage() {
                 setSelectedWardrobeId(e.target.value)
                 setSelectedClothings([]) // 切换衣橱时清空选择
               }}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]"
+              className="w-full px-5 py-3.5 border border-[var(--gray-300)] rounded-[var(--radius-lg)] text-[var(--gray-900)] bg-[var(--input-bg)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] shadow-[var(--shadow-subtle)] focus:shadow-[var(--shadow-soft)] transition-all duration-300"
             >
               {wardrobes.map(wardrobe => (
                 <option key={wardrobe.id} value={wardrobe.id}>
@@ -223,19 +235,20 @@ export default function NewOutfitPage() {
 
           {/* 搭配标签 */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a] mb-3">
+            <label className="block text-sm font-medium text-[var(--gray-900)] mb-3 tracking-wide">
               搭配标签
             </label>
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex flex-wrap gap-3 mb-3">
               {PRESET_TAGS.map(tag => (
                 <button
                   key={tag}
                   onClick={() => toggleTag(tag)}
-                  className={`px-4 py-2 rounded-full border-2 transition-all text-sm ${
+                  className={`px-5 py-2.5 rounded-[var(--radius-full)] border transition-all text-sm font-medium tracking-wide ${
                     selectedTags.includes(tag)
-                      ? 'bg-[var(--primary)] border-[var(--primary)] text-white shadow-md'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300 bg-white'
+                      ? 'bg-[var(--accent-dark)] border-[var(--accent-dark)] text-white shadow-[var(--shadow-soft)]'
+                      : 'border-[var(--gray-300)] text-[var(--gray-600)] hover:border-[var(--accent)] hover:text-[var(--accent-dark)] bg-[var(--card-bg)]'
                   }`}
+                  style={{ transition: 'all var(--transition-smooth)' }}
                 >
                   {tag}
                 </button>
@@ -244,25 +257,27 @@ export default function NewOutfitPage() {
                 <button
                   key={tag}
                   onClick={() => toggleTag(tag)}
-                  className="px-4 py-2 rounded-full bg-[var(--primary)] border-2 border-[var(--primary)] text-white shadow-md text-sm flex items-center gap-1"
+                  className="px-5 py-2.5 rounded-[var(--radius-full)] bg-[var(--accent)] border border-[var(--accent)] text-white shadow-[var(--shadow-soft)] text-sm font-medium tracking-wide flex items-center gap-2 hover:bg-[var(--accent-dark)] transition-all"
+                  style={{ transition: 'all var(--transition-smooth)' }}
                 >
                   {tag}
-                  <span className="text-xs opacity-70">×</span>
+                  <span className="text-base opacity-80">×</span>
                 </button>
               ))}
               
               {!isAddingCustomTag && (
                 <button
                   onClick={() => setIsAddingCustomTag(true)}
-                  className="px-4 py-2 rounded-full border-2 border-dashed border-gray-300 text-gray-400 hover:border-[var(--primary)] hover:text-[var(--primary)] transition-all text-sm flex items-center gap-1"
+                  className="px-5 py-2.5 rounded-[var(--radius-full)] border border-dashed border-[var(--gray-300)] text-[var(--gray-500)] hover:border-[var(--accent)] hover:text-[var(--accent-dark)] transition-all text-sm font-medium tracking-wide flex items-center gap-2 bg-[var(--card-bg)]"
+                  style={{ transition: 'all var(--transition-smooth)' }}
                 >
-                  <span className="text-lg leading-none">+</span> 自定义
+                  <span className="text-xl leading-none">+</span> 自定义
                 </button>
               )}
             </div>
             
             {isAddingCustomTag && (
-              <div className="flex gap-2 animate-in fade-in slide-in-from-top-1 duration-200">
+              <div className="flex gap-3 animate-fade-in">
                 <input
                   type="text"
                   autoFocus
@@ -278,7 +293,8 @@ export default function NewOutfitPage() {
                     }
                   }}
                   placeholder="输入自定义标签名称..."
-                  className="flex-1 px-4 py-2 border-2 border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]"
+                  className="flex-1 px-5 py-2.5 border border-[var(--gray-300)] rounded-[var(--radius-lg)] text-sm text-[var(--gray-900)] bg-[var(--input-bg)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all"
+                  style={{ transition: 'all var(--transition-smooth)' }}
                 />
                 <Button variant="primary" size="sm" onClick={addCustomTag}>
                   添加
@@ -286,7 +302,7 @@ export default function NewOutfitPage() {
                 <Button variant="ghost" size="sm" onClick={() => {
                   setIsAddingCustomTag(false)
                   setCustomTag('')
-                }} className="!text-gray-400">
+                }}>
                   取消
                 </Button>
               </div>
@@ -295,19 +311,20 @@ export default function NewOutfitPage() {
 
           {/* 适合季节 */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a] mb-3">
+            <label className="block text-sm font-medium text-[var(--gray-900)] mb-3 tracking-wide">
               适合季节
             </label>
-            <div className="flex gap-3">
+            <div className="flex gap-4">
               {PRESET_SEASONS.map(season => (
                 <button
                   key={season}
                   onClick={() => toggleSeason(season)}
-                  className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center transition-all ${
+                  className={`w-14 h-14 rounded-[var(--radius-lg)] border flex items-center justify-center transition-all font-medium ${
                     selectedSeasons.includes(season)
-                      ? 'bg-[var(--primary)] border-[var(--primary)] text-white shadow-md'
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300 bg-white'
+                      ? 'bg-[var(--accent-dark)] border-[var(--accent-dark)] text-white shadow-[var(--shadow-soft)] scale-105'
+                      : 'border-[var(--gray-300)] text-[var(--gray-600)] hover:border-[var(--accent)] hover:text-[var(--accent-dark)] bg-[var(--card-bg)]'
                   }`}
+                  style={{ transition: 'all var(--transition-smooth)' }}
                 >
                   {season}
                 </button>
@@ -317,7 +334,7 @@ export default function NewOutfitPage() {
 
           {/* 搭配描述 */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a] mb-2">
+            <label className="block text-sm font-medium text-[var(--gray-900)] mb-2 tracking-wide">
               描述（可选）
             </label>
             <textarea
@@ -325,53 +342,59 @@ export default function NewOutfitPage() {
               onChange={(e) => setDescription(e.target.value)}
               placeholder="描述这套搭配的风格、适用场合等..."
               rows={3}
-              className="w-full px-4 py-3 border-2 border-gray-300 rounded-xl text-[#1a1a1a] placeholder:text-[#5c5954] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] resize-none"
+              className="w-full px-5 py-3.5 border border-[var(--gray-300)] rounded-[var(--radius-lg)] text-[var(--gray-900)] bg-[var(--input-bg)] placeholder:text-[var(--gray-500)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] resize-none shadow-[var(--shadow-subtle)] focus:shadow-[var(--shadow-soft)] transition-all"
+              style={{ transition: 'all var(--transition-smooth)' }}
             />
           </div>
 
           {/* 选择衣物 */}
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <label className="block text-sm font-medium text-[#1a1a1a]">
-                选择衣物 ({selectedClothings.length})
+            <div className="flex items-center justify-between mb-4">
+              <label className="block text-sm font-medium text-[var(--gray-900)] tracking-wide">
+                选择衣物 
+                {selectedClothings.length > 0 && (
+                  <span className="ml-2 text-[var(--accent-dark)]">({selectedClothings.length})</span>
+                )}
               </label>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsClothingModalOpen(true)}
-                className="!text-[#1a1a1a] !border-[#1a1a1a]"
               >
                 + 添加衣物
               </Button>
             </div>
 
             {selectedClothings.length === 0 ? (
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center">
-                <p className="text-[#5c5954]">还没有选择衣物</p>
+              <div className="border border-dashed border-[var(--gray-300)] rounded-[var(--radius-xl)] p-12 text-center bg-[var(--surface)]">
+                <div className="w-16 h-16 bg-[var(--accent)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl">👔</span>
+                </div>
+                <p className="text-[var(--gray-600)] mb-4 text-editorial">还没有选择衣物</p>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsClothingModalOpen(true)}
-                  className="mt-2"
                 >
                   点击添加
                 </Button>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+              <div className="space-y-6">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
                   {selectedClothings.map(clothing => (
                     <div key={clothing.id} className="relative group">
-                      <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
+                      <div className="aspect-square rounded-[var(--radius-lg)] overflow-hidden bg-[var(--gray-100)] border border-[var(--gray-200)] shadow-[var(--shadow-subtle)] group-hover:shadow-[var(--shadow-soft)] transition-all">
                         <img
                           src={clothing.image_url}
                           alt={clothing.name || '衣物'}
-                          className="w-full h-full object-cover"
+                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
                       </div>
                       <button
                         onClick={() => toggleClothing(clothing)}
-                        className="absolute -top-2 -right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-lg"
+                        className="absolute -top-2 -right-2 w-7 h-7 flex items-center justify-center bg-[var(--error)] text-white rounded-full opacity-0 group-hover:opacity-100 transition-all shadow-[var(--shadow-medium)] hover:scale-110"
+                        style={{ transition: 'all var(--transition-smooth)' }}
                       >
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -381,17 +404,17 @@ export default function NewOutfitPage() {
                   ))}
                 </div>
 
-                <div className="flex flex-col items-center p-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                <div className="flex flex-col items-center p-8 bg-[var(--surface)] rounded-[var(--radius-xl)] border border-dashed border-[var(--gray-300)]">
                   {generatedImageUrl ? (
                     <div className="relative group">
                       <img
                         src={generatedImageUrl}
                         alt="搭配预览"
-                        className="max-w-full h-48 rounded-lg shadow-lg mb-4"
+                        className="max-w-full h-56 rounded-[var(--radius-lg)] shadow-[var(--shadow-medium)] mb-4 group-hover:shadow-[var(--shadow-elevated)] transition-all"
                       />
-                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center">
+                      <div className="absolute inset-0 bg-[var(--primary)]/60 opacity-0 group-hover:opacity-100 transition-opacity rounded-[var(--radius-lg)] flex items-center justify-center backdrop-blur-sm">
                         <Button
-                          variant="primary"
+                          variant="secondary"
                           size="sm"
                           onClick={() => setIsCanvasModalOpen(true)}
                         >
@@ -401,11 +424,13 @@ export default function NewOutfitPage() {
                     </div>
                   ) : (
                     <div className="text-center">
-                      <p className="text-sm text-gray-500 mb-3">想要让搭配看起来更棒吗？</p>
+                      <div className="w-12 h-12 bg-[var(--accent)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-2xl">✨</span>
+                      </div>
+                      <p className="text-sm text-[var(--gray-600)] mb-4 text-editorial">想要让搭配看起来更棒吗？</p>
                       <Button
                         variant="outline"
                         onClick={() => setIsCanvasModalOpen(true)}
-                        className="!text-[var(--primary)] !border-[var(--primary)]"
                         isLoading={isUploading}
                       >
                         制作搭配组合图
@@ -418,16 +443,19 @@ export default function NewOutfitPage() {
           </div>
 
           {/* 操作按钮 */}
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end gap-4 pt-6">
+            <div className="h-px flex-1 bg-gradient-to-r from-transparent via-[var(--gray-200)] to-transparent" />
+          </div>
+          <div className="flex justify-end gap-4">
             <Button
               variant="ghost"
               onClick={() => router.back()}
-              className="!text-[#1a1a1a]"
             >
               取消
             </Button>
             <Button
               variant="primary"
+              size="lg"
               onClick={handleCreate}
               isLoading={createOutfitMutation.isPending}
               disabled={selectedTags.length === 0 || selectedClothings.length === 0}
@@ -456,7 +484,7 @@ export default function NewOutfitPage() {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pb-4 border-b border-gray-200">
               {/* 一级分类 */}
               <div>
-                <label className="block text-xs font-medium text-[#5c5954] mb-2">
+                <label className="block text-xs font-medium text-[var(--gray-700)] mb-2 tracking-wide uppercase">
                   一级分类
                 </label>
                 <select
@@ -465,7 +493,8 @@ export default function NewOutfitPage() {
                     setSelectedLevel1CategoryId(e.target.value)
                     setSelectedLevel2CategoryId('all') // 重置二级分类
                   }}
-                  className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]"
+                  className="w-full px-4 py-2.5 border border-[var(--gray-300)] rounded-[var(--radius-lg)] text-sm text-[var(--gray-900)] bg-[var(--input-bg)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all"
+                  style={{ transition: 'all var(--transition-smooth)' }}
                 >
                   <option value="all">全部分类</option>
                   {level1Categories.map(cat => (
@@ -479,13 +508,14 @@ export default function NewOutfitPage() {
               {/* 二级分类 */}
               {selectedLevel1CategoryId !== 'all' && level2Categories.length > 0 && (
                 <div>
-                  <label className="block text-xs font-medium text-[#5c5954] mb-2">
+                  <label className="block text-xs font-medium text-[var(--gray-700)] mb-2 tracking-wide uppercase">
                     二级分类
                   </label>
                   <select
                     value={selectedLevel2CategoryId}
                     onChange={(e) => setSelectedLevel2CategoryId(e.target.value)}
-                    className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm text-[#1a1a1a] focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)]"
+                    className="w-full px-4 py-2.5 border border-[var(--gray-300)] rounded-[var(--radius-lg)] text-sm text-[var(--gray-900)] bg-[var(--input-bg)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition-all"
+                    style={{ transition: 'all var(--transition-smooth)' }}
                   >
                     <option value="all">全部</option>
                     {level2Categories.map(cat => (
@@ -501,13 +531,13 @@ export default function NewOutfitPage() {
 
           {/* 已选衣物数量提示 */}
           {selectedClothings.length > 0 && (
-            <div className="flex items-center justify-between px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
-              <span className="text-sm text-blue-700">
+            <div className="flex items-center justify-between px-4 py-3 bg-[var(--accent)]/10 border border-[var(--accent)]/30 rounded-[var(--radius-lg)]">
+              <span className="text-sm text-[var(--accent-dark)] font-medium">
                 已选择 {selectedClothings.length} 件衣物
               </span>
               <button
                 onClick={() => setSelectedClothings([])}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                className="text-sm text-[var(--accent-dark)] hover:text-[var(--accent)] font-medium transition-colors"
               >
                 清空选择
               </button>
@@ -516,8 +546,11 @@ export default function NewOutfitPage() {
 
           {/* 衣物列表 */}
           {clothings.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-[#5c5954] mb-4">该衣橱还没有衣物</p>
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-[var(--accent)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-4xl">👔</span>
+              </div>
+              <p className="text-[var(--gray-600)] mb-4 text-editorial">该衣橱还没有衣物</p>
               <Button
                 variant="primary"
                 onClick={() => {
@@ -529,8 +562,11 @@ export default function NewOutfitPage() {
               </Button>
             </div>
           ) : filteredClothings.length === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-[#5c5954] mb-2">该分类下没有衣物</p>
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-[var(--accent)]/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-4xl">🔍</span>
+              </div>
+              <p className="text-[var(--gray-600)] mb-2 text-editorial">该分类下没有衣物</p>
               <Button
                 variant="ghost"
                 size="sm"
@@ -538,42 +574,42 @@ export default function NewOutfitPage() {
                   setSelectedLevel1CategoryId('all')
                   setSelectedLevel2CategoryId('all')
                 }}
-                className="!text-[#1a1a1a]"
               >
                 查看全部
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[50vh] overflow-y-auto p-1">
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-4 max-h-[50vh] overflow-y-auto p-1">
               {filteredClothings.map(clothing => {
                 const isSelected = selectedClothings.some(c => c.id === clothing.id)
                 return (
                   <div
                     key={clothing.id}
                     onClick={() => toggleClothing(clothing)}
-                    className={`relative aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${
+                    className={`relative aspect-square rounded-[var(--radius-lg)] overflow-hidden cursor-pointer border transition-all group ${
                       isSelected
-                        ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] ring-opacity-50'
-                        : 'border-gray-300 hover:border-gray-400'
+                        ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]/30 shadow-[var(--shadow-soft)] scale-105'
+                        : 'border-[var(--gray-300)] hover:border-[var(--accent-light)] hover:shadow-[var(--shadow-subtle)]'
                     }`}
+                    style={{ transition: 'all var(--transition-smooth)' }}
                   >
                     <img
                       src={clothing.image_url}
                       alt={clothing.name || '衣物'}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     {isSelected && (
-                      <div className="absolute inset-0 bg-[var(--primary)]/20 flex items-center justify-center">
-                        <div className="w-8 h-8 bg-[var(--primary)] rounded-full flex items-center justify-center shadow-lg">
-                          <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      <div className="absolute inset-0 bg-[var(--accent)]/20 flex items-center justify-center backdrop-blur-[2px]">
+                        <div className="w-10 h-10 bg-[var(--accent-dark)] rounded-full flex items-center justify-center shadow-[var(--shadow-medium)]">
+                          <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                           </svg>
                         </div>
                       </div>
                     )}
                     {/* 选中序号 */}
                     {isSelected && (
-                      <div className="absolute top-2 left-2 w-6 h-6 bg-[var(--primary)] text-white text-xs font-bold rounded-full flex items-center justify-center shadow-lg">
+                      <div className="absolute top-2 left-2 w-7 h-7 bg-[var(--accent-dark)] text-white text-xs font-bold rounded-full flex items-center justify-center shadow-[var(--shadow-medium)]">
                         {selectedClothings.findIndex(c => c.id === clothing.id) + 1}
                       </div>
                     )}
@@ -584,20 +620,19 @@ export default function NewOutfitPage() {
           )}
           
           {/* 底部按钮 */}
-          <div className="flex justify-between items-center gap-3 pt-4 border-t border-gray-200">
-            <span className="text-sm text-[#5c5954]">
+          <div className="flex justify-between items-center gap-4 pt-4 border-t border-[var(--gray-200)]">
+            <span className="text-sm text-[var(--gray-600)] font-medium">
               显示 {filteredClothings.length} / {clothings.length} 件衣物
             </span>
             <div className="flex gap-3">
               <Button
-                variant="ghost"
+                variant="primary"
                 onClick={() => {
                   setIsClothingModalOpen(false)
                   // 关闭时重置筛选
                   setSelectedLevel1CategoryId('all')
                   setSelectedLevel2CategoryId('all')
                 }}
-                className="!text-[#1a1a1a]"
               >
                 完成
               </Button>
@@ -612,6 +647,15 @@ export default function NewOutfitPage() {
         onClose={() => setIsCanvasModalOpen(false)}
         clothings={selectedClothings}
         onSave={handleCanvasSave}
+      />
+
+      {/* 提示 */}
+      <Toast
+        isOpen={toast.isOpen}
+        message={toast.options.message}
+        type={toast.options.type}
+        duration={toast.options.duration}
+        onClose={toast.handleClose}
       />
     </div>
   )

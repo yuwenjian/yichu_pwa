@@ -11,24 +11,34 @@ export interface CardProps extends HTMLAttributes<HTMLDivElement> {
 const Card = forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant = 'default', hover = false, children, ...props }, ref) => {
     const variants = {
-      default: 'bg-[var(--background)] border border-[var(--gray-200)] text-[var(--gray-900)]',
-      elevated: 'bg-[var(--background)] shadow-lg text-[var(--gray-900)]',
-      outlined: 'bg-[var(--background)] border-2 border-[var(--gray-300)] text-[var(--gray-900)]',
+      default: 'bg-[var(--card-bg)] border border-[var(--gray-200)] text-[var(--gray-900)] shadow-[var(--shadow-subtle)]',
+      elevated: 'bg-[var(--card-bg)] shadow-[var(--shadow-medium)] text-[var(--gray-900)] border border-[var(--gray-100)]',
+      outlined: 'bg-[var(--card-bg)] border border-[var(--gray-300)] text-[var(--gray-900)]',
     }
     
     return (
       <div
         ref={ref}
         className={cn(
-          'rounded-xl p-6 transition-all duration-200',
+          'rounded-[var(--radius-xl)] p-6 relative overflow-hidden group',
           variants[variant],
-          hover && 'hover:shadow-xl hover:-translate-y-1 cursor-pointer',
+          hover && 'hover:shadow-[var(--shadow-elevated)] hover:-translate-y-2 cursor-pointer hover:border-[var(--accent-light)]',
           className
         )}
-        style={{ color: 'var(--gray-900)' }}
+        style={{ 
+          color: 'var(--gray-900)',
+          transition: 'all var(--transition-elegant)',
+        }}
         {...props}
       >
-        {children}
+        {/* 微妙的渐变叠加 */}
+        {hover && (
+          <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent-light)]/0 via-transparent to-transparent opacity-0 group-hover:opacity-5 transition-opacity duration-700 pointer-events-none" />
+        )}
+        
+        <div className="relative z-10">
+          {children}
+        </div>
       </div>
     )
   }

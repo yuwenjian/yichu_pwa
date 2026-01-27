@@ -8,6 +8,7 @@ import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
 import Input from '@/components/ui/Input'
+import PullToRefresh from '@/components/ui/PullToRefresh'
 import { cn } from '@/utils/cn'
 
 // 预设封面图片列表
@@ -52,7 +53,7 @@ export default function WardrobeDetailPage() {
   const router = useRouter()
   const wardrobeId = params.id as string
 
-  const { data, isLoading } = useWardrobe(wardrobeId)
+  const { data, isLoading, refetch } = useWardrobe(wardrobeId)
   const createCategoryMutation = useCreateCategory()
   const updateWardrobeMutation = useUpdateWardrobe()
 
@@ -69,6 +70,10 @@ export default function WardrobeDetailPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [editName, setEditName] = useState('')
   const [editAvatar, setEditAvatar] = useState<string>('')
+
+  const handleRefresh = async () => {
+    await refetch()
+  }
 
   const handleCreateCategory = async () => {
     if (!newCategoryName.trim()) return
@@ -148,68 +153,81 @@ export default function WardrobeDetailPage() {
   }
 
   return (
-    <div className="space-y-5 pb-6">
-      {/* 顶部标题 - 参考图风格 */}
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-[var(--gray-900)]">
-            {wardrobe.name}
-          </h1>
-          <button
-            onClick={openEditModal}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-            title="编辑衣橱"
-          >
-            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-            </svg>
-          </button>
+    <PullToRefresh onRefresh={handleRefresh}>
+      <div className="space-y-8 pb-6">
+        {/* 顶部标题 - Editorial风格 */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <h1 className="text-display text-4xl text-[var(--gray-900)]">
+                {wardrobe.name}
+              </h1>
+              <button
+                onClick={openEditModal}
+                className="p-2 hover:bg-[var(--accent)]/10 rounded-lg transition-all"
+                title="编辑衣橱"
+                style={{ transition: 'all var(--transition-smooth)' }}
+              >
+                <svg className="w-5 h-5 text-[var(--gray-600)] hover:text-[var(--accent-dark)] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                </svg>
+              </button>
+            </div>
+            <Button
+              variant="primary"
+              onClick={() => setIsCategoryModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              添加分类
+            </Button>
+          </div>
+          
+          <div className="h-px w-32 bg-gradient-to-r from-[var(--accent)] to-transparent" />
+
+          {/* 统计信息 */}
+          <div className="flex items-center gap-6 text-sm text-[var(--gray-600)] font-medium">
+            <span className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+              {clothings.length} 件衣物
+            </span>
+            {level1Categories.length > 0 && (
+              <span className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)]" />
+                {level1Categories.length} 个分类
+              </span>
+            )}
+          </div>
         </div>
-        <Button
-          variant="primary"
-          size="sm"
-          onClick={() => setIsCategoryModalOpen(true)}
-          className="flex items-center gap-1"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          添加分类
-        </Button>
-      </div>
 
-      {/* 统计信息 */}
-      <div className="flex items-center gap-4 text-sm text-white mb-5 font-medium">
-        <span>{clothings.length} 件衣物</span>
-        {level1Categories.length > 0 && (
-          <span>{level1Categories.length} 个分类</span>
-        )}
-      </div>
-
-      {/* 分类筛选 - 参考图风格 */}
+      {/* 分类筛选 - Editorial风格 */}
       {level1Categories.length > 0 && (
-        <div className="mb-5">
-          <h2 className="text-xl font-bold text-[var(--gray-900)] mb-3">分类筛选</h2>
-          <div className="flex flex-wrap gap-2">
+        <div>
+          <h2 className="text-xl font-medium text-[var(--gray-900)] mb-4">分类筛选</h2>
+          <div className="flex flex-wrap gap-3">
             <button
               onClick={() => router.push(`/dashboard/wardrobes/${wardrobeId}/clothings`)}
-              className="px-4 py-2 rounded-full text-sm font-medium bg-[#3b82f6] text-white active:scale-95 transition-transform shadow-sm"
+              className="px-5 py-2.5 rounded-[var(--radius-full)] text-sm font-medium bg-[var(--accent-dark)] text-white shadow-[var(--shadow-soft)] hover:bg-[var(--accent)] transition-all"
+              style={{ transition: 'all var(--transition-smooth)' }}
             >
               全部
             </button>
             {level1Categories.map((cat) => {
               const categoryClothings = clothings.filter(c => c.category_id === cat.id)
-              const isSelected = false // 可以根据路由参数判断
+              const isSelected = false
               return (
                 <button
                   key={cat.id}
                   onClick={() => router.push(`/dashboard/wardrobes/${wardrobeId}/clothings?category=${cat.id}`)}
                   className={cn(
-                    'px-4 py-2 rounded-full text-sm font-medium active:scale-95 transition-transform',
+                    'px-5 py-2.5 rounded-[var(--radius-full)] text-sm font-medium transition-all',
                     isSelected 
-                      ? 'bg-[#3b82f6] text-white shadow-sm' 
-                      : 'bg-white text-[#1a1a1a] shadow-sm'
+                      ? 'bg-[var(--accent-dark)] text-white shadow-[var(--shadow-soft)]' 
+                      : 'border border-[var(--gray-300)] text-[var(--gray-600)] hover:border-[var(--accent)] hover:text-[var(--accent-dark)] bg-[var(--card-bg)]'
                   )}
+                  style={{ transition: 'all var(--transition-smooth)' }}
                 >
                   {cat.name}
                 </button>
@@ -219,51 +237,57 @@ export default function WardrobeDetailPage() {
         </div>
       )}
 
-      {/* 分类列表 - 参考图风格 */}
+      {/* 分类列表 - Editorial风格 */}
       <div>
         {level1Categories.length === 0 ? (
-          <Card className="text-center py-12 border-2 border-dashed border-[var(--gray-300)]">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-[var(--gray-100)] flex items-center justify-center">
-              <svg className="w-8 h-8 text-[var(--gray-400)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <Card className="text-center py-16 border-dashed">
+            <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-[var(--accent)]/10 flex items-center justify-center">
+              <svg className="w-10 h-10 text-[var(--accent-dark)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
               </svg>
             </div>
-            <p className="text-lg text-[var(--gray-700)] mb-2 font-semibold">还没有分类</p>
-            <p className="text-sm text-[var(--gray-500)] mb-6">创建分类来更好地组织你的衣物</p>
+            <h3 className="text-2xl font-medium mb-3 text-[var(--gray-900)]">创建分类组织你的衣物</h3>
+            <p className="text-editorial text-lg text-[var(--gray-600)] mb-8 max-w-md mx-auto">
+              创建分类来更好地组织和管理你的衣物
+            </p>
             <Button
-              variant="outline"
+              variant="primary"
               onClick={() => setIsCategoryModalOpen(true)}
               size="lg"
-              className="min-h-[48px] !text-[var(--gray-900)] !border-2 !border-[var(--gray-900)] hover:!bg-[var(--gray-900)] hover:!text-white"
             >
               创建第一个分类
             </Button>
           </Card>
         ) : (
           <div className="space-y-4">
-            {level1Categories.map((cat1) => {
+            {level1Categories.map((cat1, index) => {
               const subCategories = level2Categories.filter(c => c.parent_id === cat1.id)
               const categoryClothings = clothings.filter(c => c.category_id === cat1.id || subCategories.some(sc => sc.id === c.category_id))
               
               return (
                 <Card 
                   key={cat1.id} 
-                  className="p-4 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+                  hover
+                  className={`p-6 cursor-pointer group animate-fade-in stagger-${Math.min(index + 1, 5)}`}
                   onClick={() => router.push(`/dashboard/wardrobes/${wardrobeId}/clothings?category=${cat1.id}&categoryName=${encodeURIComponent(cat1.name)}`)}
                 >
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-bold text-[#1a1a1a]">{cat1.name}</h3>
-                    <span className="text-sm text-[#2a2825] font-medium">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-xl font-medium text-[var(--gray-900)] group-hover:text-[var(--accent-dark)] transition-colors duration-300">
+                      {cat1.name}
+                    </h3>
+                    <span className="text-sm text-[var(--gray-600)] font-medium flex items-center gap-2">
                       {categoryClothings.length} 件衣物
+                      <span className="group-hover:translate-x-1 transition-transform duration-300">→</span>
                     </span>
                   </div>
                   
                   {categoryClothings.length > 0 && (
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-3 gap-3">
                       {categoryClothings.slice(0, 6).map((clothing) => (
                         <div
                           key={clothing.id}
-                          className="aspect-square bg-[var(--gray-100)] rounded-lg overflow-hidden cursor-pointer active:scale-95 transition-transform"
+                          className="aspect-square bg-[var(--gray-100)] rounded-[var(--radius-lg)] overflow-hidden cursor-pointer hover:scale-105 transition-all shadow-[var(--shadow-subtle)] hover:shadow-[var(--shadow-soft)]"
+                          style={{ transition: 'all var(--transition-smooth)' }}
                           onClick={(e) => {
                             e.stopPropagation()
                             router.push(`/dashboard/wardrobes/${wardrobeId}/clothings/${clothing.id}`)
@@ -286,7 +310,7 @@ export default function WardrobeDetailPage() {
                       ))}
                       {categoryClothings.length > 6 && (
                         <div 
-                          className="aspect-square bg-[var(--gray-200)] rounded-lg flex items-center justify-center text-[var(--gray-500)] font-semibold"
+                          className="aspect-square bg-[var(--accent)]/10 rounded-[var(--radius-lg)] flex items-center justify-center text-[var(--accent-dark)] font-semibold border border-[var(--accent)]/20"
                           onClick={(e) => e.stopPropagation()}
                         >
                           +{categoryClothings.length - 6}
@@ -301,16 +325,18 @@ export default function WardrobeDetailPage() {
         )}
       </div>
 
-      {/* 浮动添加按钮 - 参考图风格 */}
+      {/* 浮动添加按钮 - Editorial风格 */}
       <button
         onClick={() => router.push(`/dashboard/wardrobes/${wardrobeId}/clothings/new`)}
-        className="fixed bottom-20 right-4 sm:hidden z-40 w-14 h-14 bg-[#3b82f6] text-white rounded-full shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+        className="fixed bottom-20 right-4 sm:hidden z-40 w-14 h-14 bg-[var(--accent-dark)] text-white rounded-full shadow-[var(--shadow-elevated)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
+        style={{ transition: 'all var(--transition-smooth)' }}
         aria-label="添加衣物"
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
         </svg>
       </button>
+      </div>
 
       {/* 创建分类模态框 - 移动端优化 */}
       <Modal
@@ -318,20 +344,16 @@ export default function WardrobeDetailPage() {
         onClose={() => setIsCategoryModalOpen(false)}
         title="创建分类"
       >
-        <div className="space-y-6 pb-4">
-          {/* 移动端拖拽指示器 */}
-          <div className="sm:hidden flex justify-center pt-2 pb-4">
-            <div className="w-12 h-1.5 bg-[var(--gray-300)] rounded-full"></div>
-          </div>
-          
+        <div className="space-y-6">
           <div>
-            <label className="block text-base font-semibold text-[#1a1a1a] mb-4">
+            <label className="block text-sm font-medium text-[var(--gray-900)] mb-4 tracking-wide">
               分类级别
             </label>
-            <div className="flex gap-3">
-              <label className="flex-1 flex items-center justify-center gap-3 p-4 rounded-xl border-2 cursor-pointer active:scale-95 transition-all" style={{ 
-                borderColor: categoryLevel === 1 ? 'var(--primary)' : 'var(--gray-200)',
-                backgroundColor: categoryLevel === 1 ? 'var(--primary-light)' : 'white'
+            <div className="flex gap-4">
+              <label className="flex-1 flex items-center justify-center gap-3 p-4 rounded-[var(--radius-lg)] border cursor-pointer transition-all" style={{ 
+                borderColor: categoryLevel === 1 ? 'var(--accent)' : 'var(--gray-300)',
+                backgroundColor: categoryLevel === 1 ? 'var(--accent)/10' : 'var(--card-bg)',
+                transition: 'all var(--transition-smooth)'
               }}>
                 <input
                   type="radio"
@@ -341,35 +363,37 @@ export default function WardrobeDetailPage() {
                     setCategoryLevel(1)
                     setSelectedParentId('')
                   }}
-                  className="w-5 h-5 text-[var(--primary)] focus:ring-[var(--primary)]"
+                  className="w-5 h-5 text-[var(--accent)] focus:ring-[var(--accent)]"
                 />
-                <span className="text-base font-medium text-[#1a1a1a]">一级分类</span>
+                <span className="text-base font-medium text-[var(--gray-900)]">一级分类</span>
               </label>
-              <label className="flex-1 flex items-center justify-center gap-3 p-4 rounded-xl border-2 cursor-pointer active:scale-95 transition-all" style={{ 
-                borderColor: categoryLevel === 2 ? 'var(--primary)' : 'var(--gray-200)',
-                backgroundColor: categoryLevel === 2 ? 'var(--primary-light)' : 'white'
+              <label className="flex-1 flex items-center justify-center gap-3 p-4 rounded-[var(--radius-lg)] border cursor-pointer transition-all" style={{ 
+                borderColor: categoryLevel === 2 ? 'var(--accent)' : 'var(--gray-300)',
+                backgroundColor: categoryLevel === 2 ? 'var(--accent)/10' : 'var(--card-bg)',
+                transition: 'all var(--transition-smooth)'
               }}>
                 <input
                   type="radio"
                   name="level"
                   checked={categoryLevel === 2}
                   onChange={() => setCategoryLevel(2)}
-                  className="w-5 h-5 text-[var(--primary)] focus:ring-[var(--primary)]"
+                  className="w-5 h-5 text-[var(--accent)] focus:ring-[var(--accent)]"
                 />
-                <span className="text-base font-medium text-[#1a1a1a]">二级分类</span>
+                <span className="text-base font-medium text-[var(--gray-900)]">二级分类</span>
               </label>
             </div>
           </div>
 
           {categoryLevel === 2 && (
             <div className="animate-fade-in">
-              <label className="block text-base font-semibold text-[#1a1a1a] mb-3">
+              <label className="block text-sm font-medium text-[var(--gray-900)] mb-3 tracking-wide">
                 父分类
               </label>
               <select
                 value={selectedParentId}
                 onChange={(e) => setSelectedParentId(e.target.value)}
-                className="w-full px-4 py-3.5 text-base border-2 border-[var(--gray-300)] rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--primary)] focus:border-[var(--primary)] text-[#1a1a1a] bg-white min-h-[52px]"
+                className="w-full px-5 py-3.5 text-base border border-[var(--gray-300)] rounded-[var(--radius-lg)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] text-[var(--gray-900)] bg-[var(--input-bg)] min-h-[52px] shadow-[var(--shadow-subtle)] focus:shadow-[var(--shadow-soft)] transition-all"
+                style={{ transition: 'all var(--transition-smooth)' }}
               >
                 <option value="">选择父分类</option>
                 {level1Categories.map((cat) => (
@@ -394,7 +418,7 @@ export default function WardrobeDetailPage() {
             }}
           />
 
-          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-[var(--gray-200)]">
+          <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-[var(--gray-200)]">
             <Button
               variant="ghost"
               onClick={() => {
@@ -404,7 +428,7 @@ export default function WardrobeDetailPage() {
                 setSelectedParentId('')
               }}
               size="lg"
-              className="flex-1 min-h-[52px] !text-[#1a1a1a] border border-[var(--gray-200)] hover:bg-[var(--gray-50)]"
+              className="flex-1 min-h-[52px]"
             >
               取消
             </Button>
@@ -439,7 +463,7 @@ export default function WardrobeDetailPage() {
           
           {/* 封面选择 */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a] mb-3">
+            <label className="block text-sm font-medium text-[var(--gray-900)] mb-3 tracking-wide">
               选择封面（可选）
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[300px] overflow-y-auto p-1">
@@ -449,11 +473,12 @@ export default function WardrobeDetailPage() {
                   key={index}
                   type="button"
                   onClick={() => setEditAvatar(image)}
-                  className={`aspect-video rounded-lg border-2 transition-all overflow-hidden ${
+                  className={`aspect-video rounded-[var(--radius-lg)] border transition-all overflow-hidden ${
                     editAvatar === image
-                      ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] ring-opacity-50'
-                      : 'border-gray-300 hover:border-gray-400'
+                      ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]/30 scale-105'
+                      : 'border-[var(--gray-300)] hover:border-[var(--accent-light)]'
                   }`}
+                  style={{ transition: 'all var(--transition-smooth)' }}
                 >
                   <img
                     src={image}
@@ -465,16 +490,16 @@ export default function WardrobeDetailPage() {
             </div>
           </div>
           
-          <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
+          <div className="flex justify-end gap-4 pt-6 border-t border-[var(--gray-200)]">
             <Button
               variant="ghost"
               onClick={() => setIsEditModalOpen(false)}
-              className="!text-[#1a1a1a]"
             >
               取消
             </Button>
             <Button
               variant="primary"
+              size="lg"
               onClick={handleEditWardrobe}
               isLoading={updateWardrobeMutation.isPending}
               disabled={!editName.trim()}
@@ -484,6 +509,6 @@ export default function WardrobeDetailPage() {
           </div>
         </div>
       </Modal>
-    </div>
+    </PullToRefresh>
   )
 }

@@ -43,65 +43,97 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen gradient-mesh flex items-center justify-center p-4">
-      <div className="w-full max-w-md animate-fade-in">
-        <Card variant="elevated" className="p-8">
-          {/* Logo/标题区域 */}
-          <div className="text-center mb-8">
-            <h1 className="text-4xl font-bold mb-2 text-[var(--gray-900)]" style={{ fontFamily: 'Playfair Display, serif' }}>
-              衣橱管理
-            </h1>
-            <p className="text-[var(--gray-600)] dark:text-[var(--gray-400)]">登录你的账户</p>
-          </div>
+    <div className="min-h-screen gradient-mesh flex items-center justify-center p-4 relative overflow-hidden">
+      {/* 装饰性背景元素 */}
+      <div className="absolute inset-0 opacity-30">
+        <div className="absolute top-20 left-10 w-64 h-64 bg-[var(--accent-light)] rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-[var(--accent)] rounded-full blur-3xl opacity-20" />
+      </div>
+      
+      <div className="w-full max-w-lg relative z-10">
+        <div className="animate-reveal-in">
+          {/* 顶部装饰线 */}
+          <div className="h-px w-24 bg-gradient-to-r from-[var(--accent)] to-transparent mb-8 mx-auto" />
+          
+          <Card variant="elevated" className="p-10 sm:p-12 backdrop-blur-sm">
+            {/* Logo/标题区域 */}
+            <div className="text-center mb-10">
+              <p className="text-xs tracking-[0.3em] uppercase text-[var(--accent-dark)] font-medium mb-4">
+                WELCOME BACK
+              </p>
+              <h1 className="text-display text-5xl sm:text-6xl text-[var(--gray-900)] mb-3">
+                Sign In
+              </h1>
+              <p className="text-editorial text-lg text-[var(--gray-600)]">
+                继续你的风格之旅
+              </p>
+            </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {error && (
-              <div className="p-3 bg-[var(--error)]/10 border border-[var(--error)]/20 rounded-lg text-sm text-[var(--error)]">
-                {error}
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {error && (
+                <div className="p-4 bg-[var(--error)]/5 border-l-2 border-[var(--error)] rounded-[var(--radius-md)] text-sm text-[var(--error)] backdrop-blur-sm">
+                  <div className="flex items-start gap-2">
+                    <span className="inline-block w-1 h-1 rounded-full bg-[var(--error)] mt-2" />
+                    <span>{error}</span>
+                  </div>
+                </div>
+              )}
+
+              <Input
+                label="邮箱地址"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+                autoComplete="email"
+              />
+
+              <Input
+                label="密码"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="输入密码"
+                required
+                autoComplete="current-password"
+              />
+
+              <Button
+                type="submit"
+                variant="primary"
+                size="lg"
+                className="w-full mt-8"
+                isLoading={isLoading}
+              >
+                登录账户
+              </Button>
+            </form>
+
+            {/* 分隔线 */}
+            <div className="relative my-8">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[var(--gray-200)]" />
               </div>
-            )}
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-[var(--card-bg)] text-[var(--gray-500)]">或</span>
+              </div>
+            </div>
 
-            <Input
-              label="邮箱"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="your@email.com"
-              required
-              autoComplete="email"
-            />
-
-            <Input
-              label="密码"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              autoComplete="current-password"
-            />
-
-            <Button
-              type="submit"
-              variant="primary"
-              size="lg"
-              className="w-full"
-              isLoading={isLoading}
-            >
-              登录
-            </Button>
-          </form>
-
-          <div className="mt-6 text-center text-sm text-[var(--gray-600)] dark:text-[var(--gray-400)]">
-            还没有账户？{' '}
-            <Link
-              href="/register"
-              className="text-[var(--primary)] hover:text-[var(--primary-dark)] font-medium transition-colors"
-            >
-              立即注册
-            </Link>
-          </div>
-        </Card>
+            <div className="text-center text-sm text-[var(--gray-600)]">
+              还没有账户？{' '}
+              <Link
+                href="/register"
+                className="text-[var(--accent-dark)] hover:text-[var(--accent)] font-medium transition-colors duration-300 underline decoration-[var(--accent-light)] underline-offset-2 hover:decoration-[var(--accent)]"
+              >
+                创建新账户
+              </Link>
+            </div>
+          </Card>
+          
+          {/* 底部装饰线 */}
+          <div className="h-px w-24 bg-gradient-to-l from-[var(--accent)] to-transparent mt-8 mx-auto" />
+        </div>
       </div>
     </div>
   )

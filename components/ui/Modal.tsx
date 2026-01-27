@@ -63,44 +63,52 @@ export default function Modal({
         }
       }}
     >
-      {/* 背景遮罩 */}
+      {/* 背景遮罩 - 精致的模糊效果 */}
       <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-fade-in"
+        className="absolute inset-0 bg-[var(--primary)]/40 backdrop-blur-md animate-fade-in"
         onClick={onClose}
       />
       
       {/* 模态框内容 - 移动端底部弹出 */}
       <div
         className={cn(
-          'relative bg-white w-full sm:rounded-2xl shadow-2xl',
+          'relative bg-[var(--card-bg)] w-full shadow-[var(--shadow-dramatic)] border border-[var(--gray-200)]',
           'sm:w-full',
           sizes[size],
           'animate-scale-in sm:animate-scale-in',
           'max-h-[90vh] sm:max-h-[90vh] overflow-y-auto',
-          'rounded-t-3xl sm:rounded-2xl',
+          'rounded-t-[var(--radius-2xl)] sm:rounded-[var(--radius-2xl)]',
           'pb-safe sm:pb-0'
         )}
         style={{
-          animation: 'slideUp 0.3s ease-out',
+          animation: 'slideUp var(--transition-elegant) ease-out',
         }}
         onClick={(e) => e.stopPropagation()}
       >
+        {/* 移动端拖拽指示器 */}
+        <div className="sm:hidden flex justify-center pt-3 pb-2">
+          <div className="w-12 h-1 bg-[var(--gray-300)] rounded-full" />
+        </div>
+        
         {/* 头部 */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between p-5 sm:p-6 border-b border-[var(--gray-200)] sticky top-0 bg-white z-10 rounded-t-3xl sm:rounded-t-2xl">
+          <div className="flex items-center justify-between px-6 py-5 border-b border-[var(--gray-200)] sticky top-0 bg-[var(--card-bg)] z-10 backdrop-blur-sm">
             {title && (
-              <h2 className="text-xl sm:text-2xl font-bold text-[#1a1a1a]">
-                {title}
-              </h2>
+              <div>
+                <h2 className="text-display text-2xl sm:text-3xl text-[var(--gray-900)]">
+                  {title}
+                </h2>
+              </div>
             )}
             {showCloseButton && (
               <button
                 onClick={onClose}
-                className="ml-auto p-2 -mr-2 active:bg-[var(--gray-100)] rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center"
+                className="ml-auto p-2.5 hover:bg-[var(--gray-100)] rounded-lg transition-all min-w-[44px] min-h-[44px] flex items-center justify-center group"
                 aria-label="关闭"
+                style={{ transition: 'all var(--transition-smooth)' }}
               >
                 <svg
-                  className="w-6 h-6 text-[var(--gray-500)]"
+                  className="w-6 h-6 text-[var(--gray-500)] group-hover:text-[var(--gray-900)] transition-colors"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -117,7 +125,7 @@ export default function Modal({
           </div>
         )}
         
-        <div className="p-5 sm:p-6">{children}</div>
+        <div className="p-6 sm:p-8">{children}</div>
       </div>
     </div>
   )

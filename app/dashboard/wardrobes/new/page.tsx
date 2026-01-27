@@ -101,14 +101,14 @@ export default function NewWardrobePage() {
         <Button
           variant="ghost"
           onClick={() => router.back()}
-          className="mb-4 !text-white"
+          className="mb-4"
         >
           ← 返回
         </Button>
-        <h1 className="text-3xl font-bold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+        <h1 className="text-display text-4xl text-[var(--gray-900)]">
           创建新衣橱
         </h1>
-        <p className="text-white/80 mt-2">
+        <p className="text-editorial text-lg text-[var(--gray-600)] mt-3">
           为你的衣物创建一个新的衣橱，可以按家庭成员或用途分类管理
         </p>
       </div>
@@ -116,8 +116,11 @@ export default function NewWardrobePage() {
       <Card className="p-8">
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="p-3 bg-[var(--error)]/10 border border-[var(--error)]/20 rounded-lg text-sm text-[var(--error)]">
-              {error}
+            <div className="p-4 bg-[var(--error)]/5 border-l-2 border-[var(--error)] rounded-[var(--radius-md)] text-sm text-[var(--error)] backdrop-blur-sm">
+              <div className="flex items-start gap-2">
+                <span className="inline-block w-1 h-1 rounded-full bg-[var(--error)] mt-2" />
+                <span>{error}</span>
+              </div>
             </div>
           )}
 
@@ -134,7 +137,7 @@ export default function NewWardrobePage() {
 
           {/* 封面选择 */}
           <div>
-            <label className="block text-sm font-medium text-[#1a1a1a] mb-3">
+            <label className="block text-sm font-medium text-[var(--gray-900)] mb-3 tracking-wide">
               选择封面（可选）
             </label>
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[300px] overflow-y-auto p-1">
@@ -144,11 +147,12 @@ export default function NewWardrobePage() {
                   key={index}
                   type="button"
                   onClick={() => setSelectedAvatar(image)}
-                  className={`aspect-video rounded-lg border-2 transition-all overflow-hidden ${
+                  className={`aspect-video rounded-[var(--radius-lg)] border-2 transition-all overflow-hidden ${
                     selectedAvatar === image
-                      ? 'border-[var(--primary)] ring-2 ring-[var(--primary)] ring-opacity-50'
-                      : 'border-gray-300 hover:border-gray-400'
+                      ? 'border-[var(--accent)] ring-2 ring-[var(--accent)] ring-opacity-50 scale-105'
+                      : 'border-[var(--gray-300)] hover:border-[var(--accent-light)]'
                   }`}
+                  style={{ transition: 'all var(--transition-smooth)' }}
                 >
                   <img
                     src={image}
@@ -165,7 +169,6 @@ export default function NewWardrobePage() {
               type="button"
               variant="ghost"
               onClick={() => router.back()}
-              className="!text-[#1a1a1a]"
             >
               取消
             </Button>
@@ -183,12 +186,25 @@ export default function NewWardrobePage() {
       </Card>
 
       {/* 提示信息 */}
-      <Card className="p-6 bg-white/5 backdrop-blur-sm border border-white/10">
-        <h3 className="text-lg font-semibold mb-2 text-white">💡 提示</h3>
-        <ul className="space-y-2 text-sm text-white/80">
-          <li>• 一个账号可以创建多个衣橱，方便管理不同成员的衣物</li>
-          <li>• 创建衣橱后，可以添加分类和上传衣物</li>
-          <li>• 衣橱名称可以随时修改</li>
+      <Card className="p-6 border-[var(--accent-light)]">
+        <h3 className="text-lg font-medium mb-3 text-[var(--gray-900)] flex items-center gap-2">
+          <span className="text-2xl">💡</span>
+          <span>温馨提示</span>
+        </h3>
+        <div className="h-px w-16 bg-[var(--accent)] mb-4" />
+        <ul className="space-y-3 text-sm text-[var(--gray-600)]">
+          <li className="flex items-start gap-2">
+            <span className="inline-block w-1 h-1 rounded-full bg-[var(--accent)] mt-2 flex-shrink-0" />
+            <span>一个账号可以创建多个衣橱，方便管理不同成员的衣物</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="inline-block w-1 h-1 rounded-full bg-[var(--accent)] mt-2 flex-shrink-0" />
+            <span>创建衣橱后，可以添加分类和上传衣物</span>
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="inline-block w-1 h-1 rounded-full bg-[var(--accent)] mt-2 flex-shrink-0" />
+            <span>衣橱名称可以随时修改</span>
+          </li>
         </ul>
       </Card>
     </div>

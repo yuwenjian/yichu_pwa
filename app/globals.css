@@ -1,74 +1,98 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Crimson+Pro:wght@200;300;400;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  /* 主色调 - 优雅的米白色和深灰 */
-  --background: #faf9f7;
-  --foreground: #1a1a1a;
+  /* Editorial Luxury 主题 - 奢华编辑风格 */
+  --background: #fcfaf8;
+  --foreground: #1c1816;
   
-  /* 品牌色 - 温暖的卡其色和深棕色 */
-  --primary: #8b7355;
-  --primary-dark: #6b5a45;
-  --primary-light: #c4b5a0;
+  /* 品牌色 - 深邃奢华的色调 */
+  --primary: #2c2320;
+  --primary-dark: #1a1210;
+  --primary-light: #6b5e58;
   
-  /* 辅助色 */
-  --accent: #d4a574;
-  --accent-light: #e8d4b8;
+  /* 辅助色 - 温暖的金色点缀 */
+  --accent: #c9a96e;
+  --accent-light: #e8d4b0;
+  --accent-dark: #8b7545;
   
-  /* 中性色 */
-  --gray-50: #faf9f7;
-  --gray-100: #f5f3f0;
-  --gray-200: #e8e6e3;
-  --gray-300: #d4d1cc;
-  --gray-400: #a8a5a0;
-  --gray-500: #7a7772;
-  --gray-600: #5c5954;
-  --gray-700: #3d3b38;
-  --gray-800: #2a2825;
-  --gray-900: #1a1a1a;
+  /* 中性色 - 细腻的灰度层次 */
+  --gray-50: #fcfaf8;
+  --gray-100: #f7f4f1;
+  --gray-200: #e9e5e0;
+  --gray-300: #d4cec7;
+  --gray-400: #b5aca3;
+  --gray-500: #8d8378;
+  --gray-600: #6b625a;
+  --gray-700: #4a423c;
+  --gray-800: #2f2a26;
+  --gray-900: #1c1816;
+  
+  /* 表面背景 */
+  --card-bg: #ffffff;
+  --input-bg: #ffffff;
+  --surface: #fefdfb;
   
   /* 功能色 */
-  --success: #7c9473;
-  --error: #c97d7d;
-  --warning: #d4a574;
-  --info: #7a9cc6;
+  --success: #5a7a54;
+  --error: #b85858;
+  --warning: #c9a96e;
+  --info: #6b8aaa;
   
-  /* 阴影 */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  /* 精致阴影 */
+  --shadow-subtle: 0 1px 3px rgba(28, 24, 22, 0.04), 0 1px 2px rgba(28, 24, 22, 0.02);
+  --shadow-soft: 0 2px 8px rgba(28, 24, 22, 0.06), 0 1px 4px rgba(28, 24, 22, 0.04);
+  --shadow-medium: 0 4px 16px rgba(28, 24, 22, 0.08), 0 2px 8px rgba(28, 24, 22, 0.04);
+  --shadow-elevated: 0 8px 32px rgba(28, 24, 22, 0.12), 0 4px 16px rgba(28, 24, 22, 0.06);
+  --shadow-dramatic: 0 20px 64px rgba(28, 24, 22, 0.16), 0 8px 32px rgba(28, 24, 22, 0.08);
   
-  /* 圆角 */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 12px;
-  --radius-xl: 16px;
+  /* 圆角 - 更精致的比例 */
+  --radius-sm: 2px;
+  --radius-md: 4px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
   --radius-full: 9999px;
   
-  /* 过渡 */
-  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  /* 优雅的过渡 */
+  --transition-swift: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 350ms cubic-bezier(0.25, 0.1, 0.25, 1);
+  --transition-elegant: 600ms cubic-bezier(0.22, 0.61, 0.36, 1);
+  --transition-luxurious: 800ms cubic-bezier(0.19, 1, 0.22, 1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #1a1a1a;
-    --foreground: #faf9f7;
-    --gray-50: #1a1a1a;
-    --gray-100: #2a2825;
-    --gray-200: #33312e;
-    --gray-300: #454340;
-    --gray-400: #5c5954;
-    --gray-500: #8a8782;
-    --gray-600: #a8a5a0;
-    --gray-900: #faf9f7;
-    --primary-light: #453a2d;
-    --accent-light: #4a3a2a;
+    /* 暗色模式 - 深邃奢华 */
+    --background: #0a0908;
+    --foreground: #f7f4f1;
+    --surface: #131211;
+    
+    --primary: #e8d4b0;
+    --primary-dark: #c9a96e;
+    --primary-light: #f7f0e3;
+    
+    --accent: #c9a96e;
+    --accent-light: #e8d4b0;
+    --accent-dark: #8b7545;
+    
+    --gray-50: #0a0908;
+    --gray-100: #1a1715;
+    --gray-200: #2f2a26;
+    --gray-300: #4a423c;
+    --gray-400: #6b625a;
+    --gray-500: #8d8378;
+    --gray-600: #b5aca3;
+    --gray-700: #d4cec7;
+    --gray-800: #e9e5e0;
+    --gray-900: #f7f4f1;
+    
+    /* 卡片背景 - 保持层次 */
+    --card-bg: #1a1715;
+    --input-bg: #2f2a26;
   }
 }
 
@@ -81,8 +105,12 @@
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-feature-settings: 'kern' 1;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 400;
+  font-size: 16px;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -100,7 +128,7 @@ body {
   padding-top: env(safe-area-inset-top);
 }
 
-/* 确保所有输入框文字清晰可见 */
+/* 确保所有输入框和选择器文字清晰可见 */
 input[type="text"],
 input[type="email"],
 input[type="password"],
@@ -113,6 +141,11 @@ textarea,
 select {
   color: var(--gray-900) !important;
   -webkit-text-fill-color: var(--gray-900) !important;
+}
+
+/* 确保 select 的下拉箭头可见 */
+select {
+  background-color: var(--input-bg);
 }
 
 input::placeholder,
@@ -128,16 +161,33 @@ input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
 input:-webkit-autofill:active {
   -webkit-text-fill-color: var(--gray-900) !important;
-  -webkit-box-shadow: 0 0 0px 1000px var(--background) inset !important;
-  box-shadow: 0 0 0px 1000px var(--background) inset !important;
+  -webkit-box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
+  box-shadow: 0 0 0px 1000px var(--input-bg) inset !important;
 }
 
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: 'Playfair Display', serif;
-  font-weight: 600;
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-weight: 500;
+  letter-spacing: -0.015em;
+  line-height: 1.15;
+  font-feature-settings: 'liga' 1, 'dlig' 1;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 5vw, 4.5rem);
+  font-weight: 300;
   letter-spacing: -0.02em;
-  line-height: 1.2;
+}
+
+h2 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: 400;
+}
+
+h3 {
+  font-size: clamp(1.5rem, 3vw, 2.5rem);
+  font-weight: 500;
 }
 
 /* 自定义滚动条 */
@@ -159,11 +209,11 @@ h1, h2, h3, h4, h5, h6 {
   background: var(--gray-400);
 }
 
-/* 动画 */
+/* 优雅的动画效果 */
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -174,7 +224,7 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translateX(-32px);
   }
   to {
     opacity: 1;
@@ -185,7 +235,7 @@ h1, h2, h3, h4, h5, h6 {
 @keyframes scaleIn {
   from {
     opacity: 0;
-    transform: scale(0.95);
+    transform: scale(0.92);
   }
   to {
     opacity: 1;
@@ -204,11 +254,44 @@ h1, h2, h3, h4, h5, h6 {
   }
 }
 
+@keyframes revealIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px) scale(0.96);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
+  }
+  100% {
+    background-position: 1000px 0;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -100%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
 @media (min-width: 640px) {
   @keyframes slideUp {
     from {
       opacity: 0;
-      transform: scale(0.95);
+      transform: scale(0.92);
     }
     to {
       opacity: 1;
@@ -218,29 +301,137 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .animate-fade-in {
-  animation: fadeIn var(--transition-base) ease-out;
+  animation: fadeIn var(--transition-smooth) ease-out;
 }
 
 .animate-slide-in {
-  animation: slideIn var(--transition-base) ease-out;
+  animation: slideIn var(--transition-smooth) ease-out;
 }
 
 .animate-scale-in {
-  animation: scaleIn var(--transition-base) ease-out;
+  animation: scaleIn var(--transition-elegant) ease-out;
 }
+
+.animate-reveal-in {
+  animation: revealIn var(--transition-luxurious) ease-out;
+}
+
+.animate-slide-down {
+  animation: slideDown var(--transition-smooth) ease-out;
+}
+
+/* 交错动画 */
+.stagger-1 { animation-delay: 100ms; }
+.stagger-2 { animation-delay: 200ms; }
+.stagger-3 { animation-delay: 300ms; }
+.stagger-4 { animation-delay: 400ms; }
+.stagger-5 { animation-delay: 500ms; }
 
 /* 工具类 */
 .text-balance {
   text-wrap: balance;
 }
 
-/* 渐变背景 */
-.gradient-mesh {
-  background: linear-gradient(135deg, var(--gray-50) 0%, var(--gray-100) 100%);
+/* Editorial 文字样式 */
+.text-editorial {
+  font-family: 'Crimson Pro', 'Georgia', serif;
+  font-weight: 300;
+  letter-spacing: 0.01em;
+  line-height: 1.7;
+}
+
+.text-display {
+  font-family: 'Cormorant Garamond', 'Georgia', serif;
+  font-weight: 300;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+/* 精致的分隔线 */
+.divider-elegant {
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    var(--gray-300) 20%,
+    var(--gray-300) 80%,
+    transparent 100%
+  );
+}
+
+/* 光泽效果 */
+.shimmer {
   position: relative;
+  overflow: hidden;
+}
+
+.shimmer::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    transparent 100%
+  );
+  animation: shimmer 3s infinite;
+}
+
+/* 奢华卡片效果 */
+.card-luxury {
+  background: var(--card-bg);
+  border: 1px solid var(--gray-200);
+  box-shadow: var(--shadow-medium);
+  transition: all var(--transition-elegant);
+}
+
+.card-luxury:hover {
+  box-shadow: var(--shadow-elevated);
+  transform: translateY(-4px);
+  border-color: var(--accent-light);
+}
+
+/* Editorial 渐变背景 - 精致的光影效果 */
+.gradient-mesh {
+  background: 
+    linear-gradient(135deg, var(--gray-50) 0%, var(--surface) 100%);
+  position: relative;
+  overflow: hidden;
 }
 
 .gradient-mesh::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: 
+    radial-gradient(ellipse at 20% 30%, var(--accent-light) 0%, transparent 40%),
+    radial-gradient(ellipse at 80% 70%, var(--accent-light) 0%, transparent 45%),
+    radial-gradient(circle at 50% 50%, var(--gray-100) 0%, transparent 60%);
+  opacity: 0.15;
+  pointer-events: none;
+  animation: meshFloat 20s ease-in-out infinite;
+}
+
+@keyframes meshFloat {
+  0%, 100% {
+    transform: translate(0, 0) rotate(0deg);
+  }
+  33% {
+    transform: translate(5%, -5%) rotate(1deg);
+  }
+  66% {
+    transform: translate(-5%, 5%) rotate(-1deg);
+  }
+}
+
+.gradient-mesh::after {
   content: '';
   position: absolute;
   top: 0;
@@ -248,13 +439,72 @@ h1, h2, h3, h4, h5, h6 {
   right: 0;
   bottom: 0;
   background: 
-    radial-gradient(circle at 20% 50%, var(--accent-light) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, var(--primary-light) 0%, transparent 50%);
-  opacity: 0.3;
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      var(--gray-900) 2px,
+      var(--gray-900) 3px
+    );
+  opacity: 0.015;
   pointer-events: none;
 }
 
-/* 确保渐变背景上的文字清晰可见 */
 .gradient-mesh {
   color: var(--gray-900);
+}
+
+/* 日期输入框自定义样式 */
+input[type="date"].date-input {
+  position: relative;
+  cursor: pointer;
+  color-scheme: light;
+}
+
+/* 隐藏原生的日期选择器图标，使用自定义图标 */
+input[type="date"].date-input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  position: absolute;
+  right: 12px;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  margin: 0;
+  /* 完全隐藏原生图标 */
+  opacity: 0 !important;
+  background: none !important;
+  background-color: transparent !important;
+  color: transparent !important;
+  /* 但保持可点击 */
+  pointer-events: auto;
+  z-index: 2;
+}
+
+/* Firefox的日期选择器样式 - 也隐藏 */
+input[type="date"].date-input::-moz-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0 !important;
+  background: transparent !important;
+}
+
+/* 确保日期输入框可点击 */
+input[type="date"].date-input::-webkit-inner-spin-button,
+input[type="date"].date-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* 日期输入框的清除按钮 */
+input[type="date"].date-input::-webkit-clear-button {
+  display: none;
+}
+
+/* 额外的强制样式 */
+input[type="date"].date-input::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+input[type="date"].date-input::-webkit-datetime-edit-text {
+  color: var(--gray-900);
+  padding: 0;
 }

@@ -59,7 +59,10 @@ export default function BottomNav() {
   const pathname = usePathname()
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white rounded-t-3xl shadow-[0_-2px_10px_rgba(0,0,0,0.05)] pb-safe sm:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--card-bg)]/90 backdrop-blur-xl border-t border-[var(--gray-200)] pb-safe sm:hidden">
+      {/* 顶部装饰线 */}
+      <div className="h-px bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent opacity-40" />
+      
       <div className="flex items-center justify-around h-16 px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname?.startsWith(item.href + '/'))
@@ -70,23 +73,35 @@ export default function BottomNav() {
               key={item.href}
               href={item.href}
               className={cn(
-                'flex flex-col items-center justify-center flex-1 h-full min-w-0',
-                'transition-colors duration-200',
-                'active:bg-[var(--gray-50)] rounded-lg'
+                'flex flex-col items-center justify-center flex-1 h-full min-w-0 relative group',
+                'transition-all duration-300',
+                'active:scale-95'
               )}
             >
-              <div className={cn(
-                'mb-1 transition-colors',
-                isActive ? 'text-[#3b82f6]' : 'text-[var(--gray-500)]'
-              )}>
-                {Icon}
+              {/* 激活状态的背景 */}
+              {isActive && (
+                <div className="absolute inset-0 bg-[var(--accent)]/5 rounded-lg" />
+              )}
+              
+              <div className="relative z-10 flex flex-col items-center">
+                <div className={cn(
+                  'mb-1 transition-all duration-300',
+                  isActive ? 'text-[var(--accent-dark)] scale-110' : 'text-[var(--gray-500)] group-active:scale-90'
+                )}>
+                  {Icon}
+                </div>
+                <span className={cn(
+                  'text-xs font-medium tracking-wide transition-all duration-300',
+                  isActive ? 'text-[var(--accent-dark)]' : 'text-[var(--gray-500)]'
+                )}>
+                  {item.label}
+                </span>
+                
+                {/* 激活状态的指示线 */}
+                {isActive && (
+                  <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-px bg-[var(--accent)]" />
+                )}
               </div>
-              <span className={cn(
-                'text-xs font-medium transition-colors',
-                isActive ? 'text-[#3b82f6]' : 'text-[var(--gray-500)]'
-              )}>
-                {item.label}
-              </span>
             </Link>
           )
         })}

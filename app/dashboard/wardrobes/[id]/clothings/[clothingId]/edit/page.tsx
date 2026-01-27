@@ -1,10 +1,11 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import { removeBackground } from '@/lib/image-processor'
 import { useCategories } from '@/lib/hooks/useCategoriesQuery'
+import type { Clothing } from '@/types'
 import Card from '@/components/ui/Card'
 import Button from '@/components/ui/Button'
 import Input from '@/components/ui/Input'
@@ -20,21 +21,24 @@ const STATUSES = [
   { value: 'discarded', label: '丢弃' },
 ]
 
-export default function NewClothingPage() {
+export default function EditClothingPage() {
   const params = useParams()
   const router = useRouter()
   const wardrobeId = params.id as string
+  const clothingId = params.clothingId as string
 
-  const { data: categories = [], isLoading } = useCategories(wardrobeId)
-  const [uploading, setUploading] = useState(false)
+  const { data: categories = [], isLoading: categoriesLoading } = useCategories(wardrobeId)
+  const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
   
   const toast = useToast()
   
   // 表单数据
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const [processedImages, setProcessedImages] = useState<string[]>([])
+  const [clothing, setClothing] = useState<Clothing | null>(null)
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+  const [processedImage, setProcessedImage] = useState<string>('')
   const [removeBg, setRemoveBg] = useState(false)
-  const [processingImages, setProcessingImages] = useState(false)
+  const [processingImage, setProcessingImage] = useState(false)
   
   const [categoryId, setCategoryId] = useState('')
   const [name, setName] = useState('')
@@ -50,63 +54,87 @@ export default function NewClothingPage() {
 
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || [])
-    if (files.length === 0) return
+  // 加载衣物数据
+  useEffect(() => {
+    loadClothing()
+  }, [clothingId])
 
-    setSelectedFiles(files)
-    setProcessingImages(true)
+  const loadClothing = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('clothings')
+        .select('*')
+        .eq('id', clothingId)
+        .single()
 
-    // 处理图片（如果需要抠图）
-    const processed: string[] = []
-    for (const file of files) {
-      try {
-        let processedBlob: Blob
-        
-        if (removeBg) {
-          // 执行抠图
-          processedBlob = await removeBackground(file, { backgroundColor: '#FFFFFF' })
-        } else {
-          processedBlob = file
-        }
+      if (error) throw error
 
-        // 转换为预览 URL
-        const previewUrl = URL.createObjectURL(processedBlob)
-        processed.push(previewUrl)
-      } catch (error) {
-        console.error('Error processing image:', error)
-        // 如果处理失败，使用原图
-        processed.push(URL.createObjectURL(file))
+      if (data) {
+        setClothing(data)
+        setCategoryId(data.category_id || '')
+        setName(data.name || '')
+        setColors(data.colors || [])
+        setSeasons(data.seasons || [])
+        setBrand(data.brand || '')
+        setPrice(data.price?.toString() || '')
+        setPurchaseDate(data.purchase_date || '')
+        setStatus(data.status || 'normal')
+        setNotes(data.notes || '')
       }
+    } catch (error) {
+      console.error('Error loading clothing:', error)
+      toast.error('加载失败')
+    } finally {
+      setLoading(false)
     }
-
-    setProcessedImages(processed)
-    setProcessingImages(false)
   }
 
-  const handleUpload = async () => {
-    if (selectedFiles.length === 0 || !categoryId) {
-      toast.warning('请选择图片和分类')
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setSelectedFile(file)
+    setProcessingImage(true)
+
+    try {
+      let processedBlob: Blob
+      
+      if (removeBg) {
+        processedBlob = await removeBackground(file, { backgroundColor: '#FFFFFF' })
+      } else {
+        processedBlob = file
+      }
+
+      const previewUrl = URL.createObjectURL(processedBlob)
+      setProcessedImage(previewUrl)
+    } catch (error) {
+      console.error('Error processing image:', error)
+      setProcessedImage(URL.createObjectURL(file))
+    } finally {
+      setProcessingImage(false)
+    }
+  }
+
+  const handleSave = async () => {
+    if (!categoryId) {
+      toast.warning('请选择分类')
       return
     }
 
-    setUploading(true)
+    setSaving(true)
 
     try {
-      const uploadedUrls: string[] = []
+      let imageUrl = clothing?.image_url
 
-      // 上传每张图片
-      for (let i = 0; i < selectedFiles.length; i++) {
-        const file = selectedFiles[i]
-        let fileToUpload = file
+      // 如果选择了新图片，先上传
+      if (selectedFile) {
+        let fileToUpload = selectedFile
 
-        // 如果选择了抠图，使用处理后的图片
-        if (removeBg && processedImages[i]) {
-          const response = await fetch(processedImages[i])
+        if (removeBg && processedImage) {
+          const response = await fetch(processedImage)
           fileToUpload = await response.blob() as File
         }
 
-        // 上传到服务器
         const formData = new FormData()
         formData.append('file', fileToUpload)
         formData.append('removeBg', removeBg.toString())
@@ -124,51 +152,63 @@ export default function NewClothingPage() {
         }
 
         const { data } = await uploadResponse.json()
-        uploadedUrls.push(data.imageUrl)
+        imageUrl = data.imageUrl
       }
 
-      // 为每张图片创建衣物记录
-      for (const imageUrl of uploadedUrls) {
-        const { error } = await supabase
-          .from('clothings')
-          .insert([
-            {
-              wardrobe_id: wardrobeId,
-              category_id: categoryId,
-              name: name || undefined,
-              image_url: imageUrl,
-              colors,
-              seasons,
-              brand: brand || undefined,
-              price: price ? parseFloat(price) : undefined,
-              purchase_date: purchaseDate || undefined,
-              status,
-              notes: notes || undefined,
-            },
-          ])
+      // 更新衣物信息
+      const { error } = await supabase
+        .from('clothings')
+        .update({
+          category_id: categoryId,
+          name: name || null,
+          image_url: imageUrl,
+          colors,
+          seasons,
+          brand: brand || null,
+          price: price ? parseFloat(price) : null,
+          purchase_date: purchaseDate || null,
+          status,
+          notes: notes || null,
+        })
+        .eq('id', clothingId)
 
-        if (error) throw error
-      }
+      if (error) throw error
 
       // 清理预览 URL
-      processedImages.forEach(url => URL.revokeObjectURL(url))
+      if (processedImage) {
+        URL.revokeObjectURL(processedImage)
+      }
 
-      router.push(`/dashboard/wardrobes/${wardrobeId}`)
+      toast.success('保存成功')
+      setTimeout(() => {
+        router.push(`/dashboard/wardrobes/${wardrobeId}/clothings/${clothingId}`)
+      }, 500)
     } catch (error) {
-      console.error('Error uploading:', error)
-      toast.error('上传失败，请重试')
+      console.error('Error saving:', error)
+      toast.error('保存失败，请重试')
     } finally {
-      setUploading(false)
+      setSaving(false)
     }
   }
 
   const level2Categories = categories.filter(c => c.level === 2)
 
-  if (isLoading) {
+  if (loading || categoriesLoading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--primary)]"></div>
       </div>
+    )
+  }
+
+  if (!clothing) {
+    return (
+      <Card className="text-center py-12">
+        <p className="text-[var(--gray-600)] mb-4 font-medium">衣物不存在</p>
+        <Button variant="ghost" onClick={() => router.back()}>
+          返回
+        </Button>
+      </Card>
     )
   }
 
@@ -189,9 +229,9 @@ export default function NewClothingPage() {
           </span>
         </Button>
         <div>
-          <p className="text-xs tracking-[0.2em] uppercase text-[var(--gray-500)] mb-2">NEW ITEM</p>
+          <p className="text-xs tracking-[0.2em] uppercase text-[var(--gray-500)] mb-2">EDIT ITEM</p>
           <h1 className="text-display text-4xl md:text-5xl text-[var(--gray-900)]">
-            添加衣物
+            编辑衣物
           </h1>
         </div>
         <div className="h-px w-32 bg-gradient-to-r from-[var(--accent)] to-transparent" />
@@ -200,9 +240,23 @@ export default function NewClothingPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* 左侧：图片上传 */}
         <Card className="p-6">
-          <h2 className="text-xl font-medium mb-5 text-[var(--gray-900)]">上传图片</h2>
+          <h2 className="text-xl font-medium mb-5 text-[var(--gray-900)]">更换图片（可选）</h2>
           
           <div className="space-y-5">
+            {/* 当前图片 */}
+            {clothing.image_url && !processedImage && (
+              <div>
+                <p className="text-sm text-[var(--gray-600)] mb-2">当前图片</p>
+                <div className="aspect-square bg-[var(--gray-100)] rounded-[var(--radius-lg)] overflow-hidden shadow-[var(--shadow-subtle)]">
+                  <img
+                    src={clothing.image_url}
+                    alt={clothing.name || '衣物'}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              </div>
+            )}
+
             {/* 抠图开关 */}
             <label className="flex items-center space-x-3 cursor-pointer p-3 rounded-[var(--radius-lg)] hover:bg-[var(--accent)]/5 transition-all group">
               <input
@@ -225,7 +279,6 @@ export default function NewClothingPage() {
               <input
                 ref={fileInputRef}
                 type="file"
-                multiple
                 accept="image/*"
                 onChange={handleFileSelect}
                 className="hidden"
@@ -236,7 +289,7 @@ export default function NewClothingPage() {
                 </svg>
               </div>
               <p className="text-[var(--gray-900)] font-medium mb-1">
-                点击或拖拽图片到这里
+                点击选择新图片
               </p>
               <p className="text-sm text-[var(--gray-600)]">
                 支持 JPG、PNG、WebP，单张最大 10MB
@@ -244,24 +297,23 @@ export default function NewClothingPage() {
             </div>
 
             {/* 图片预览 */}
-            {processingImages && (
+            {processingImage && (
               <div className="text-center py-6">
                 <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[var(--accent)] mx-auto"></div>
                 <p className="text-sm text-[var(--gray-600)] mt-3">处理中...</p>
               </div>
             )}
 
-            {processedImages.length > 0 && (
-              <div className="grid grid-cols-2 gap-3">
-                {processedImages.map((url, index) => (
-                  <div key={index} className="aspect-square bg-[var(--gray-100)] rounded-[var(--radius-lg)] overflow-hidden shadow-[var(--shadow-subtle)]">
-                    <img
-                      src={url}
-                      alt={`预览 ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                ))}
+            {processedImage && (
+              <div>
+                <p className="text-sm text-[var(--gray-600)] mb-2">新图片预览</p>
+                <div className="aspect-square bg-[var(--gray-100)] rounded-[var(--radius-lg)] overflow-hidden shadow-[var(--shadow-subtle)]">
+                  <img
+                    src={processedImage}
+                    alt="预览"
+                    className="w-full h-full object-cover"
+                  />
+                </div>
               </div>
             )}
           </div>
@@ -304,7 +356,6 @@ export default function NewClothingPage() {
                 颜色（可多选）
               </label>
               <div className="space-y-4">
-                {/* 预设颜色按钮 */}
                 <div className="flex flex-wrap gap-2.5">
                   {COLORS.map((color) => (
                     <button
@@ -337,7 +388,6 @@ export default function NewClothingPage() {
                   </button>
                 </div>
                 
-                {/* 自定义颜色输入 */}
                 {showCustomColorInput && (
                   <div className="flex gap-3 animate-fade-in">
                     <input
@@ -372,7 +422,6 @@ export default function NewClothingPage() {
                   </div>
                 )}
                 
-                {/* 已选颜色标签 */}
                 {colors.length > 0 && (
                   <div className="flex flex-wrap gap-2 pt-3 border-t border-[var(--gray-200)]">
                     <span className="text-xs text-[var(--gray-600)] self-center tracking-wide uppercase">已选择：</span>
@@ -498,11 +547,11 @@ export default function NewClothingPage() {
         <Button
           variant="primary"
           size="lg"
-          onClick={handleUpload}
-          isLoading={uploading}
-          disabled={selectedFiles.length === 0 || !categoryId || processingImages}
+          onClick={handleSave}
+          isLoading={saving}
+          disabled={!categoryId || processingImage}
         >
-          保存 {selectedFiles.length > 0 && `(${selectedFiles.length} 张)`}
+          保存修改
         </Button>
       </div>
 
