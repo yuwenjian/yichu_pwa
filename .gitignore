@@ -28,6 +28,10 @@ yarn-error.log*
 .env*.local
 .env
 
+# lock files (统一使用 npm)
+yarn.lock
+package-lock.json
+
 # vercel
 .vercel
 
