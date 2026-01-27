@@ -1,14 +1,16 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import Script from 'next/script'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import type { Clothing } from '@/types'
 
-// 动态导入 fabric 以避免 SSR 问题和 node-gyp 编译问题
-let fabric: any;
-if (typeof window !== 'undefined') {
-  fabric = require('fabric').fabric;
+// 声明全局 fabric 变量
+declare global {
+  interface Window {
+    fabric: any
+  }
 }
 
 interface OutfitCanvasModalProps {
@@ -40,12 +42,13 @@ export default function OutfitCanvasModal({
   onSave,
 }: OutfitCanvasModalProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const fabricCanvasRef = useRef<fabric.Canvas | null>(null)
+  const fabricCanvasRef = useRef<any>(null)
   const [backgroundColor, setBackgroundColor] = useState('#FFFFFF')
   const [isLoading, setIsLoading] = useState(false)
+  const [isFabricReady, setIsFabricReady] = useState(false)
 
-  const loadClothings = (canvas: fabric.Canvas, items: Clothing[]) => {
-    if (items.length === 0) return
+  const loadClothings = (canvas: any, items: Clothing[]) => {
+    if (!window.fabric || items.length === 0) return
     
     setIsLoading(true)
     const canvasSize = canvas.getWidth()
@@ -58,18 +61,15 @@ export default function OutfitCanvasModal({
         return
       }
 
-      // 使用代理 URL 解决跨域问题
       const proxyUrl = `/api/proxy/image?url=${encodeURIComponent(item.image_url)}`
 
-      fabric.Image.fromURL(proxyUrl, (img) => {
+      window.fabric.Image.fromURL(proxyUrl, (img: any) => {
         loadedCount++
         
         if (img) {
-          // 设置初始缩放和位置
           const scale = (canvasSize * 0.4) / Math.max(img.width || 1, img.height || 1)
           img.scale(scale)
           
-          // 错开位置
           img.set({
             left: (canvasSize * 0.1) + (index % 3) * (canvasSize * 0.2),
             top: (canvasSize * 0.1) + Math.floor(index / 3) * (canvasSize * 0.2),
@@ -82,8 +82,6 @@ export default function OutfitCanvasModal({
 
           canvas.add(img)
           canvas.renderAll()
-        } else {
-          console.error('Failed to load image via proxy:', item.image_url)
         }
 
         if (loadedCount === items.length) {
@@ -95,12 +93,10 @@ export default function OutfitCanvasModal({
   }
 
   useEffect(() => {
-    if (isOpen && canvasRef.current && !fabricCanvasRef.current) {
-      // 获取容器宽度，适配移动端
+    if (isOpen && isFabricReady && canvasRef.current && !fabricCanvasRef.current) {
       const containerWidth = Math.min(window.innerWidth - 64, 500)
       
-      // 初始化 Fabric Canvas
-      const canvas = new fabric.Canvas(canvasRef.current, {
+      const canvas = new window.fabric.Canvas(canvasRef.current, {
         width: containerWidth,
         height: containerWidth,
         backgroundColor: '#FFFFFF',
@@ -108,12 +104,6 @@ export default function OutfitCanvasModal({
 
       fabricCanvasRef.current = canvas
 
-      // 允许点击外部取消选择
-      canvas.on('selection:cleared', () => {
-        // 可以处理取消选择后的逻辑
-      })
-
-      // 延迟加载图片，确保画布已准备就绪
       setTimeout(() => {
         loadClothings(canvas, clothings)
       }, 200)
@@ -125,9 +115,8 @@ export default function OutfitCanvasModal({
         fabricCanvasRef.current = null
       }
     }
-  }, [isOpen, clothings]) // 添加 clothings 依赖
+  }, [isOpen, isFabricReady, clothings])
 
-  // 当选中的衣物发生变化时重新加载（如果弹窗已经打开）
   useEffect(() => {
     if (isOpen && fabricCanvasRef.current) {
       const canvas = fabricCanvasRef.current
@@ -137,12 +126,11 @@ export default function OutfitCanvasModal({
       })
       loadClothings(canvas, clothings)
     }
-  }, [clothings, backgroundColor, isOpen]) // 添加缺失依赖
+  }, [clothings, backgroundColor, isOpen])
 
   const handleSave = () => {
     if (!fabricCanvasRef.current) return
     
-    // 取消所有选择后再导出
     fabricCanvasRef.current.discardActiveObject()
     fabricCanvasRef.current.renderAll()
 
@@ -156,7 +144,7 @@ export default function OutfitCanvasModal({
       onClose()
     } catch (error) {
       console.error('Canvas export failed:', error)
-      alert('图片导出失败，可能是因为图片跨域限制。请确保存储服务已配置 CORS。')
+      alert('图片导出失败，可能是因为图片跨域限制。')
     }
   }
 
@@ -193,92 +181,105 @@ export default function OutfitCanvasModal({
   }
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="制作搭配图"
-      size="xl"
-    >
-      <div className="flex flex-col md:flex-row gap-6">
-        {/* 画布区域 */}
-        <div className="flex-1 flex flex-col items-center bg-gray-50 rounded-xl overflow-hidden p-4 border-2 border-gray-200">
-          <div className="relative shadow-xl">
-            <canvas ref={canvasRef} />
-            {isLoading && (
-              <div className="absolute inset-0 flex items-center justify-center bg-white/50">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--primary)]"></div>
-              </div>
-            )}
-          </div>
-          <p className="mt-4 text-xs text-gray-400">
-            {clothings.length} 件衣物已加载
-          </p>
-        </div>
-
-        {/* 控制面板 */}
-        <div className="w-full md:w-72 space-y-6">
-          <div>
-            <h3 className="text-sm font-semibold text-[#1a1a1a] mb-3">背景颜色</h3>
-            <div className="grid grid-cols-4 gap-2">
-              {PRESET_BACKGROUNDS.map((color) => (
-                <button
-                  key={color}
-                  onClick={() => changeBgColor(color)}
-                  className={`aspect-square rounded-full border-2 transition-all shadow-sm ${
-                    backgroundColor === color ? 'border-[var(--primary)] scale-110 ring-2 ring-[var(--primary)] ring-opacity-20' : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                  style={{ backgroundColor: color }}
-                  title={color}
-                />
-              ))}
+    <>
+      <Script 
+        src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"
+        onLoad={() => setIsFabricReady(true)}
+      />
+      
+      <Modal
+        isOpen={isOpen}
+        onClose={onClose}
+        title="制作搭配图"
+        size="xl"
+      >
+        <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex-1 flex flex-col items-center bg-gray-50 rounded-xl overflow-hidden p-4 border-2 border-gray-200">
+            <div className="relative shadow-xl">
+              {!isFabricReady ? (
+                <div className="w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] flex items-center justify-center bg-white">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--primary)]"></div>
+                </div>
+              ) : (
+                <canvas ref={canvasRef} />
+              )}
+              {isLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-white/50">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--primary)]"></div>
+                </div>
+              )}
             </div>
-          </div>
-
-          <div>
-            <h3 className="text-sm font-semibold text-[#1a1a1a] mb-3">图层操作</h3>
-            <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" size="sm" onClick={bringToFront} className="text-xs !text-[#4a4a4a] !border-gray-300 hover:!bg-gray-50">
-                置于顶层
-              </Button>
-              <Button variant="outline" size="sm" onClick={sendToBack} className="text-xs !text-[#4a4a4a] !border-gray-300 hover:!bg-gray-50">
-                置于底层
-              </Button>
-              <Button variant="outline" size="sm" onClick={deleteSelected} className="text-xs !text-red-600 !border-red-100 hover:!bg-red-50">
-                删除选中
-              </Button>
-              <Button variant="outline" size="sm" onClick={() => {
-                fabricCanvasRef.current?.clear()
-                fabricCanvasRef.current?.setBackgroundColor(backgroundColor, () => {
-                  loadClothings(fabricCanvasRef.current!, clothings)
-                })
-              }} className="text-xs !text-[#4a4a4a] !border-gray-300 hover:!bg-gray-50">
-                重置画布
-              </Button>
-            </div>
-          </div>
-
-          <div className="pt-6 border-t border-gray-100">
-            <p className="text-xs text-gray-400 mb-4 leading-relaxed">
-              提示：您可以点击并拖动衣物图片来移动位置，使用边框角进行缩放和旋转。
+            <p className="mt-4 text-xs text-gray-400">
+              {clothings.length} 件衣物已加载
             </p>
-            <div className="flex gap-2">
-              <Button variant="ghost" className="flex-1 !text-[#4a4a4a] hover:!bg-gray-100" onClick={onClose}>
-                取消
-              </Button>
-              <Button variant="primary" className="flex-1 shadow-md hover:shadow-lg transition-shadow" onClick={handleSave} disabled={isLoading}>
-                确认完成
-              </Button>
+          </div>
+
+          <div className="w-full md:w-72 space-y-6">
+            <div>
+              <h3 className="text-sm font-semibold text-[#1a1a1a] mb-3">背景颜色</h3>
+              <div className="grid grid-cols-4 gap-2">
+                {PRESET_BACKGROUNDS.map((color) => (
+                  <button
+                    key={color}
+                    onClick={() => changeBgColor(color)}
+                    className={`aspect-square rounded-full border-2 transition-all shadow-sm ${
+                      backgroundColor === color ? 'border-[var(--primary)] scale-110 ring-2 ring-[var(--primary)] ring-opacity-20' : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    style={{ backgroundColor: color }}
+                    title={color}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h3 className="text-sm font-semibold text-[#1a1a1a] mb-3">图层操作</h3>
+              <div className="grid grid-cols-2 gap-2">
+                <Button variant="outline" size="sm" onClick={bringToFront} className="text-xs !text-[#4a4a4a] !border-gray-300 hover:!bg-gray-50">
+                  置于顶层
+                </Button>
+                <Button variant="outline" size="sm" onClick={sendToBack} className="text-xs !text-[#4a4a4a] !border-gray-300 hover:!bg-gray-50">
+                  置于底层
+                </Button>
+                <Button variant="outline" size="sm" onClick={deleteSelected} className="text-xs !text-red-600 !border-red-100 hover:!bg-red-50">
+                  删除选中
+                </Button>
+                <Button variant="outline" size="sm" onClick={() => {
+                  if (fabricCanvasRef.current) {
+                    fabricCanvasRef.current.clear()
+                    fabricCanvasRef.current.setBackgroundColor(backgroundColor, () => {
+                      loadClothings(fabricCanvasRef.current, clothings)
+                    })
+                  }
+                }} className="text-xs !text-[#4a4a4a] !border-gray-300 hover:!bg-gray-50">
+                  重置画布
+                </Button>
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-gray-100">
+              <p className="text-xs text-gray-400 mb-4 leading-relaxed">
+                提示：您可以点击并拖动衣物图片来移动位置，使用边框角进行缩放和旋转。
+              </p>
+              <div className="flex gap-2">
+                <Button variant="ghost" className="flex-1 !text-[#4a4a4a] hover:!bg-gray-100" onClick={onClose}>
+                  取消
+                </Button>
+                <Button variant="primary" className="flex-1 shadow-md hover:shadow-lg transition-shadow" onClick={handleSave} disabled={isLoading || !isFabricReady}>
+                  确认完成
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <style jsx global>{`
-        .canvas-container {
-          margin: 0 auto;
-          touch-action: none;
-        }
-      `}</style>
-    </Modal>
+        <style jsx global>{`
+          .canvas-container {
+            margin: 0 auto;
+            touch-action: none;
+          }
+        `}</style>
+      </Modal>
+    </>
   )
 }
