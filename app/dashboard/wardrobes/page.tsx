@@ -84,7 +84,7 @@ export default function WardrobesPage() {
     e.preventDefault() // 阻止链接跳转
     e.stopPropagation()
 
-    if (!confirm(`确定要删除衣橱"${name}"吗？\n\n删除后衣橱内的所有衣物和分类也将被删除，且无法恢复！`)) {
+    if (!confirm(`确定要删除衣橱 ${name} 吗？\n\n删除后衣橱内的所有衣物和分类也将被删除，且无法恢复！`)) {
       return
     }
 

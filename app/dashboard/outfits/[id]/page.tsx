@@ -15,7 +15,7 @@ export default function OutfitDetailPage() {
   const incrementUseCountMutation = useIncrementOutfitUseCount()
 
   const handleDelete = async () => {
-    if (!confirm(`确定要删除搭配"${outfit?.name}"吗？`)) {
+    if (!confirm(`确定要删除搭配 ${outfit?.name} 吗？`)) {
       return
     }
 
@@ -147,7 +147,7 @@ export default function OutfitDetailPage() {
       <Card className="p-6 bg-white/5 backdrop-blur-sm border border-white/10">
         <h3 className="text-lg font-semibold mb-2 text-white">💡 提示</h3>
         <ul className="space-y-2 text-sm text-white/80">
-          <li>• 点击"记录穿搭"可以增加使用次数统计</li>
+          <li>• 点击【记录穿搭】可以增加使用次数统计</li>
           <li>• 点击单品图片可以查看衣物详情</li>
           <li>• 可以编辑或删除这套搭配</li>
         </ul>

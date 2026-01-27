@@ -40,7 +40,7 @@ export default function OutfitsPage() {
   const handleDelete = async (id: string, name: string, e: React.MouseEvent) => {
     e.stopPropagation()
     
-    if (!confirm(`确定要删除搭配"${name}"吗？`)) {
+    if (!confirm(`确定要删除搭配 ${name} 吗？`)) {
       return
     }
 
