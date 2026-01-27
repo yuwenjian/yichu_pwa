@@ -1,10 +1,15 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { fabric } from 'fabric'
 import Modal from '@/components/ui/Modal'
 import Button from '@/components/ui/Button'
 import type { Clothing } from '@/types'
+
+// 动态导入 fabric 以避免 SSR 问题和 node-gyp 编译问题
+let fabric: any;
+if (typeof window !== 'undefined') {
+  fabric = require('fabric').fabric;
+}
 
 interface OutfitCanvasModalProps {
   isOpen: boolean
