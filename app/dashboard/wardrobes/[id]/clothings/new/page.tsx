@@ -33,8 +33,10 @@ export default function NewClothingPage() {
   // 表单数据
   const [selectedFiles, setSelectedFiles] = useState<File[]>([])
   const [processedImages, setProcessedImages] = useState<string[]>([])
+  const [processedBlobs, setProcessedBlobs] = useState<Blob[]>([]) // 保存处理后的Blob
   const [removeBg, setRemoveBg] = useState(false)
   const [processingImages, setProcessingImages] = useState(false)
+  const [processingProgress, setProcessingProgress] = useState(0) // 处理进度
   
   const [categoryId, setCategoryId] = useState('')
   const [name, setName] = useState('')
@@ -54,34 +56,60 @@ export default function NewClothingPage() {
     const files = Array.from(e.target.files || [])
     if (files.length === 0) return
 
+    console.log('=== 开始处理图片 ===')
+    console.log('removeBg 状态:', removeBg)
+    console.log('文件数量:', files.length)
+
     setSelectedFiles(files)
     setProcessingImages(true)
+    setProcessingProgress(0)
 
     // 处理图片（如果需要抠图）
-    const processed: string[] = []
-    for (const file of files) {
+    const processedUrls: string[] = []
+    const processedBlobsArray: Blob[] = []
+    
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i]
       try {
         let processedBlob: Blob
         
         if (removeBg) {
-          // 执行抠图
-          processedBlob = await removeBackground(file, { backgroundColor: '#FFFFFF' })
+          console.log('✅ removeBg = true, 将执行抠图')
+          // 执行抠图（带进度回调）
+          console.log(`开始处理图片 ${i + 1}/${files.length}:`, file.name)
+          processedBlob = await removeBackground(file, { 
+            backgroundColor: 'transparent', // 使用透明背景
+            maxSize: 1024, // 限制最大尺寸以加快速度
+            onProgress: (progress) => {
+              // 计算总体进度
+              const totalProgress = ((i / files.length) * 100) + (progress / files.length)
+              setProcessingProgress(Math.round(totalProgress))
+            }
+          })
+          console.log(`图片处理完成 ${i + 1}/${files.length}:`, file.name)
         } else {
+          console.log('❌ removeBg = false, 跳过抠图')
           processedBlob = file
         }
 
+        // 保存处理后的Blob
+        processedBlobsArray.push(processedBlob)
+        
         // 转换为预览 URL
         const previewUrl = URL.createObjectURL(processedBlob)
-        processed.push(previewUrl)
+        processedUrls.push(previewUrl)
       } catch (error) {
         console.error('Error processing image:', error)
         // 如果处理失败，使用原图
-        processed.push(URL.createObjectURL(file))
+        processedBlobsArray.push(file)
+        processedUrls.push(URL.createObjectURL(file))
       }
     }
 
-    setProcessedImages(processed)
+    setProcessedBlobs(processedBlobsArray)
+    setProcessedImages(processedUrls)
     setProcessingImages(false)
+    setProcessingProgress(0)
   }
 
   const handleUpload = async () => {
@@ -98,12 +126,17 @@ export default function NewClothingPage() {
       // 上传每张图片
       for (let i = 0; i < selectedFiles.length; i++) {
         const file = selectedFiles[i]
-        let fileToUpload = file
+        let fileToUpload: File | Blob = file
 
         // 如果选择了抠图，使用处理后的图片
-        if (removeBg && processedImages[i]) {
-          const response = await fetch(processedImages[i])
-          fileToUpload = await response.blob() as File
+        if (removeBg && processedBlobs[i]) {
+          // 直接使用保存的处理后的 Blob
+          const blob = processedBlobs[i]
+          // 创建新的 File 对象
+          fileToUpload = new File([blob], file.name.replace(/\.[^/.]+$/, '.png'), { type: 'image/png' })
+          console.log('上传处理后的图片:', fileToUpload.name)
+        } else {
+          console.log('上传原始图片:', file.name)
         }
 
         // 上传到服务器
@@ -208,11 +241,15 @@ export default function NewClothingPage() {
               <input
                 type="checkbox"
                 checked={removeBg}
-                onChange={(e) => setRemoveBg(e.target.checked)}
+                onChange={(e) => {
+                  const checked = e.target.checked
+                  console.log('复选框状态改变:', checked)
+                  setRemoveBg(checked)
+                }}
                 className="w-5 h-5 text-[var(--accent)] rounded focus:ring-[var(--accent)]"
               />
               <span className="text-sm text-[var(--gray-900)] font-medium group-hover:text-[var(--accent-dark)] transition-colors">
-                自动去除背景（设置为白色）
+                自动去除背景{removeBg && ' ✓'}
               </span>
             </label>
 
@@ -239,15 +276,26 @@ export default function NewClothingPage() {
                 点击或拖拽图片到这里
               </p>
               <p className="text-sm text-[var(--gray-600)]">
-                支持 JPG、PNG、WebP，单张最大 10MB
+                支持 JPG、PNG、WebP，支持多张上传，单张最大 10MB
               </p>
             </div>
 
-            {/* 图片预览 */}
+            {/* 图片处理进度 */}
             {processingImages && (
               <div className="text-center py-6">
                 <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-[var(--accent)] mx-auto"></div>
-                <p className="text-sm text-[var(--gray-600)] mt-3">处理中...</p>
+                <p className="text-sm text-[var(--gray-600)] mt-3">
+                  {removeBg ? '正在去除背景...' : '处理中...'}
+                  {processingProgress > 0 && ` ${processingProgress}%`}
+                </p>
+                {processingProgress > 0 && (
+                  <div className="w-full max-w-xs mx-auto mt-3 bg-[var(--gray-200)] rounded-full h-2 overflow-hidden">
+                    <div 
+                      className="bg-[var(--accent)] h-full rounded-full transition-all duration-300"
+                      style={{ width: `${processingProgress}%` }}
+                    />
+                  </div>
+                )}
               </div>
             )}
 

@@ -223,7 +223,7 @@ export default function WardrobesPage() {
         }}
         title="创建新衣橱"
       >
-        <div className="space-y-5 h-full flex flex-col">
+        <div className="space-y-5">
           <Input
             label="衣橱名称"
             value={newWardrobeName}
@@ -238,11 +238,11 @@ export default function WardrobesPage() {
           />
           
           {/* 封面选择 */}
-          <div className="flex flex-col">
+          <div>
             <label className="block text-sm font-medium text-[var(--gray-900)] mb-3 tracking-wide">
               选择封面（可选）
             </label>
-            <div className="overflow-y-auto -mx-6 px-6 sm:mx-0 sm:px-0 max-h-[45vh] sm:max-h-[400px]">
+            <div className="overflow-y-auto -mx-6 px-6 sm:mx-0 sm:px-0 max-h-[50vh] sm:max-h-[300px]">
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 pb-4">
                 {/* 预设封面 */}
                 {COVER_IMAGES.map((image, index) => (
@@ -277,7 +277,7 @@ export default function WardrobesPage() {
             </div>
           </div>
           
-          <div className="flex gap-3 pt-5 pb-2 mt-4 border-t border-[var(--gray-200)] -mx-6 px-6 sm:mx-0 sm:px-0 bg-[var(--card-bg)] sm:static">
+          <div className="flex gap-3 pt-4 mt-4 border-t border-[var(--gray-200)]">
             <Button
               variant="ghost"
               onClick={() => {
@@ -295,7 +295,7 @@ export default function WardrobesPage() {
               onClick={handleCreateWardrobe}
               isLoading={createWardrobeMutation.isPending}
               disabled={!newWardrobeName.trim()}
-              className="flex-1 sm:flex-none"
+              className="flex-1 sm:flex-none !text-white"
             >
               创建
             </Button>

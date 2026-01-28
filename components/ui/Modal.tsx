@@ -127,7 +127,7 @@ export default function Modal({
           </div>
         )}
         
-        <div className="p-6 sm:p-8 flex-1 flex flex-col overflow-hidden">{children}</div>
+        <div className="p-6 sm:p-8 flex-1 overflow-y-auto">{children}</div>
       </div>
     </div>
   )

@@ -266,7 +266,7 @@ export default function EditClothingPage() {
                 className="w-5 h-5 text-[var(--accent)] rounded focus:ring-[var(--accent)]"
               />
               <span className="text-sm text-[var(--gray-900)] font-medium group-hover:text-[var(--accent-dark)] transition-colors">
-                自动去除背景（设置为白色）
+                自动去除背景
               </span>
             </label>
 
