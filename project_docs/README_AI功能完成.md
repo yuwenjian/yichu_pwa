@@ -201,7 +201,7 @@ try {
 ### 环境变量
 ```env
 # .env.local
-DEEPSEEK_API_KEY=sk-c72b66fd67054bf6b897fca517a655ad
+DEEPSEEK_API_KEY=*********
 ```
 
 ### API 参数
