@@ -25,7 +25,7 @@ AI 建议功能已集成 DeepSeek AI，提供智能的、个性化的衣橱管�
 确认环境变量已配置：
 ```bash
 # .env.local
-DEEPSEEK_API_KEY=sk-c72b66fd67054bf6b897fca517a655ad
+DEEPSEEK_API_KEY=""""""""
 ```
 
 ### 2. 启动开发服务器
