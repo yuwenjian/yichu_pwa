@@ -69,15 +69,17 @@ export default function Modal({
         onClick={onClose}
       />
       
-      {/* 模态框内容 - 移动端底部弹出 */}
+      {/* 模态框内容 - 移动端全屏 */}
       <div
         className={cn(
           'relative bg-[var(--card-bg)] w-full shadow-[var(--shadow-dramatic)] border border-[var(--gray-200)]',
           'sm:w-full',
           sizes[size],
           'animate-scale-in sm:animate-scale-in',
-          'max-h-[90vh] sm:max-h-[90vh] overflow-y-auto',
-          'rounded-t-[var(--radius-2xl)] sm:rounded-[var(--radius-2xl)]',
+          'h-full sm:h-auto sm:max-h-[90vh]',
+          'flex flex-col',
+          'overflow-hidden',
+          'rounded-none sm:rounded-[var(--radius-2xl)]',
           'pb-safe sm:pb-0'
         )}
         style={{
@@ -85,8 +87,8 @@ export default function Modal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 移动端拖拽指示器 */}
-        <div className="sm:hidden flex justify-center pt-3 pb-2">
+        {/* 移动端拖拽指示器 - 隐藏 */}
+        <div className="hidden">
           <div className="w-12 h-1 bg-[var(--gray-300)] rounded-full" />
         </div>
         
@@ -125,7 +127,7 @@ export default function Modal({
           </div>
         )}
         
-        <div className="p-6 sm:p-8">{children}</div>
+        <div className="p-6 sm:p-8 flex-1 flex flex-col overflow-hidden">{children}</div>
       </div>
     </div>
   )

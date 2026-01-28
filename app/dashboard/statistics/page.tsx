@@ -69,30 +69,32 @@ export default function StatisticsPage() {
     <PullToRefresh onRefresh={handleRefresh}>
       <div className="space-y-8">
         {/* 顶部标题 - Editorial风格 */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs tracking-[0.2em] uppercase text-[var(--gray-500)] mb-2">ANALYTICS</p>
-              <h1 className="text-display text-4xl md:text-5xl text-[var(--gray-900)]">
-                数据统计
-              </h1>
+        <div className="md:static sticky top-0 z-30 bg-[var(--background)] md:bg-transparent pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 border-b md:border-b-0 border-[var(--gray-200)]">
+          <div className="space-y-3 md:space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] md:text-xs tracking-[0.2em] uppercase text-[var(--gray-500)] mb-2">ANALYTICS</p>
+                <h1 className="text-display text-3xl md:text-5xl text-[var(--gray-900)]">
+                  数据统计
+                </h1>
+              </div>
+              {wardrobes.length > 0 && (
+                <select
+                  value={selectedWardrobeId}
+                  onChange={(e) => setSelectedWardrobeId(e.target.value)}
+                  className="px-3 py-2 md:px-4 md:py-3 border border-[var(--gray-300)] rounded-[var(--radius-lg)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] text-[var(--gray-900)] bg-[var(--input-bg)] shadow-[var(--shadow-subtle)] transition-all text-sm md:text-base"
+                  style={{ transition: 'all var(--transition-smooth)' }}
+                >
+                  {wardrobes.map((w) => (
+                    <option key={w.id} value={w.id}>
+                      {w.name}
+                    </option>
+                  ))}
+                </select>
+              )}
             </div>
-            {wardrobes.length > 0 && (
-              <select
-                value={selectedWardrobeId}
-                onChange={(e) => setSelectedWardrobeId(e.target.value)}
-                className="px-4 py-3 border border-[var(--gray-300)] rounded-[var(--radius-lg)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:border-[var(--accent)] text-[var(--gray-900)] bg-[var(--input-bg)] shadow-[var(--shadow-subtle)] transition-all"
-                style={{ transition: 'all var(--transition-smooth)' }}
-              >
-                {wardrobes.map((w) => (
-                  <option key={w.id} value={w.id}>
-                    {w.name}
-                  </option>
-                ))}
-              </select>
-            )}
+            <div className="h-px w-20 md:w-32 bg-gradient-to-r from-[var(--accent)] to-transparent" />
           </div>
-          <div className="h-px w-32 bg-gradient-to-r from-[var(--accent)] to-transparent" />
         </div>
 
       {/* 概览卡片 - Editorial风格 */}

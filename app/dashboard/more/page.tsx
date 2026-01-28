@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { useAuthStore } from '@/stores/authStore'
 import Card from '@/components/ui/Card'
 
 interface FeatureCard {
@@ -46,21 +47,29 @@ const features: FeatureCard[] = [
 
 export default function MorePage() {
   const router = useRouter()
+  const { user, signOut } = useAuthStore()
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push('/login')
+  }
 
   return (
     <div className="space-y-8">
       {/* 顶部标题 */}
-      <div className="space-y-4">
-        <div>
-          <p className="text-xs tracking-[0.2em] uppercase text-[var(--gray-500)] mb-2">MORE FEATURES</p>
-          <h1 className="text-display text-4xl md:text-5xl text-[var(--gray-900)]">
-            更多功能
-          </h1>
+      <div className="md:static sticky top-0 z-30 bg-[var(--background)] md:bg-transparent pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 border-b md:border-b-0 border-[var(--gray-200)]">
+        <div className="space-y-3 md:space-y-4">
+          <div>
+            <p className="text-[10px] md:text-xs tracking-[0.2em] uppercase text-[var(--gray-500)] mb-2">MORE FEATURES</p>
+            <h1 className="text-display text-3xl md:text-5xl text-[var(--gray-900)]">
+              更多功能
+            </h1>
+          </div>
+          <div className="h-px w-20 md:w-32 bg-gradient-to-r from-[var(--accent)] to-transparent" />
+          <p className="text-sm md:text-base text-[var(--gray-600)]">
+            探索更多强大的衣橱管理功能，让数据为您服务
+          </p>
         </div>
-        <div className="h-px w-32 bg-gradient-to-r from-[var(--accent)] to-transparent" />
-        <p className="text-[var(--gray-600)]">
-          探索更多强大的衣橱管理功能，让数据为您服务
-        </p>
       </div>
 
       {/* 功能卡片网格 */}
@@ -139,6 +148,46 @@ export default function MorePage() {
             <div className="text-3xl mb-2">🏠</div>
             <div className="text-sm font-medium text-[var(--gray-900)]">
               返回首页
+            </div>
+          </button>
+        </div>
+      </Card>
+
+      {/* 账户设置 */}
+      <Card className="p-6">
+        <h2 className="text-2xl font-medium mb-5 text-[var(--gray-900)]">
+          账户设置
+        </h2>
+        <div className="space-y-4">
+          {/* 当前账户信息 */}
+          <div className="flex items-center justify-between p-4 rounded-[var(--radius-lg)] bg-[var(--gray-100)]">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-[var(--accent)] flex items-center justify-center">
+                <span className="text-white text-lg font-medium">
+                  {user?.email?.[0]?.toUpperCase() || 'U'}
+                </span>
+              </div>
+              <div>
+                <div className="text-sm font-medium text-[var(--gray-900)]">
+                  {user?.email || '未登录'}
+                </div>
+                <div className="text-xs text-[var(--gray-600)]">
+                  当前账户
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* 退出登录按钮 */}
+          <button
+            onClick={handleSignOut}
+            className="w-full p-4 rounded-[var(--radius-lg)] bg-[var(--error)]/5 hover:bg-[var(--error)]/10 transition-all text-center group border border-[var(--error)]/20"
+          >
+            <div className="flex items-center justify-center gap-2 text-[var(--error)] group-hover:text-[var(--error-dark)]">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+              </svg>
+              <span className="font-medium">退出登录</span>
             </div>
           </button>
         </div>

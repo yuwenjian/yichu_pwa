@@ -86,26 +86,30 @@ export default function OutfitsPage() {
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="space-y-8 pb-20">
         {/* 顶部标题 - Editorial风格 */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs tracking-[0.2em] uppercase text-[var(--gray-500)] mb-2">MY LOOKS</p>
-              <h1 className="text-display text-4xl md:text-5xl text-[var(--gray-900)]">
-                我的搭配
-              </h1>
-            </div>
+        <div className="md:static sticky top-0 z-30 bg-[var(--background)] md:bg-transparent pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 border-b md:border-b-0 border-[var(--gray-200)]">
+          <div className="space-y-3 md:space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-[10px] md:text-xs tracking-[0.2em] uppercase text-[var(--gray-500)] mb-2">MY LOOKS</p>
+                <h1 className="text-display text-3xl md:text-5xl text-[var(--gray-900)]">
+                  我的搭配
+                </h1>
+              </div>
             <Button
-              variant="primary"
+              variant="secondary"
+              size="sm"
               onClick={() => router.push('/dashboard/outfits/new')}
-              className="flex items-center gap-2"
+              className="flex items-center gap-1.5 md:!px-6 md:!py-2.5 md:!text-base md:!min-h-[44px] md:!gap-2"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3.5 h-3.5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              创建搭配
+              <span className="hidden sm:inline">创建搭配</span>
+              <span className="sm:hidden">创建</span>
             </Button>
+            </div>
+            <div className="h-px w-20 md:w-32 bg-gradient-to-r from-[var(--accent)] to-transparent" />
           </div>
-          <div className="h-px w-32 bg-gradient-to-r from-[var(--accent)] to-transparent" />
         </div>
 
       {/* 筛选栏 - Editorial风格 */}

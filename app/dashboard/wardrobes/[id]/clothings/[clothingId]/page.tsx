@@ -128,9 +128,11 @@ export default function ClothingDetailPage() {
   return (
     <Fragment>
       <PullToRefresh onRefresh={handleRefresh}>
-      <div className="max-w-3xl mx-auto space-y-8 pb-20">
-        {/* 顶部按钮 - Editorial风格 */}
-        <div className="flex items-center justify-between">
+      <div className="max-w-3xl mx-auto space-y-4 pb-20">
+        {/* 顶部按钮 - PC端文字按钮，移动端图标按钮 */}
+        
+        {/* PC端样式 - 隐藏在移动端 */}
+        <div className="hidden md:flex items-center justify-between">
           <Button variant="ghost" onClick={() => router.back()} className="-ml-2">
             <span className="flex items-center gap-2">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -157,9 +159,61 @@ export default function ClothingDetailPage() {
               variant="outline" 
               onClick={handleDelete} 
               className="!bg-[var(--error)] !text-white !border-[var(--error)] hover:!bg-[var(--error-dark)]"
+            >
+              删除
+            </Button>
+          </div>
+        </div>
+
+        {/* 移动端样式 - 隐藏在PC端 */}
+        <div className="flex md:hidden items-center justify-between">
+          {/* 返回按钮 */}
+          <button 
+            onClick={() => router.back()} 
+            className="flex items-center gap-1 text-[var(--gray-900)] hover:text-[var(--accent-dark)] transition-colors -ml-1 px-2 py-1"
           >
-            删除
-          </Button>
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            <span className="text-sm">返回</span>
+          </button>
+          
+          {/* 操作按钮 - 小文字按钮 */}
+          <div className="flex gap-1.5">
+            {/* 记录穿搭 */}
+            <button
+              onClick={handleRecordWear}
+              disabled={incrementUseCountMutation.isPending}
+              className="px-3 py-1.5 text-xs bg-[var(--accent-light)] text-[var(--gray-900)] rounded-lg hover:bg-[var(--accent)] transition-all disabled:opacity-40 shadow-sm hover:shadow active:scale-95 font-medium"
+            >
+              {incrementUseCountMutation.isPending ? (
+                <span className="flex items-center gap-1">
+                  <svg className="animate-spin h-3 w-3" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  记录
+                </span>
+              ) : (
+                '记录穿搭'
+              )}
+            </button>
+            
+            {/* 编辑 */}
+            <button
+              onClick={() => router.push(`/dashboard/wardrobes/${wardrobeId}/clothings/${clothingId}/edit`)}
+              className="px-3 py-1.5 text-xs border border-[var(--gray-900)] text-[var(--gray-900)] rounded-lg hover:bg-[var(--gray-900)] hover:text-white transition-all shadow-sm hover:shadow active:scale-95 font-medium"
+            >
+              编辑
+            </button>
+            
+            {/* 删除 */}
+            <button
+              onClick={handleDelete}
+              className="px-3 py-1.5 text-xs bg-[var(--error)] text-white rounded-lg hover:bg-[var(--error-dark)] transition-all shadow-sm hover:shadow active:scale-95 font-medium"
+            >
+              删除
+            </button>
           </div>
         </div>
 

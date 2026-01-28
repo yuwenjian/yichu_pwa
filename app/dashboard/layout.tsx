@@ -41,8 +41,8 @@ export default function DashboardLayout({
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      {/* 导航栏 */}
-      <nav className="bg-[var(--card-bg)]/80 border-b border-[var(--gray-200)] sticky top-0 z-40 backdrop-blur-xl">
+      {/* 导航栏 - 移动端隐藏 */}
+      <nav className="hidden md:block bg-[var(--card-bg)]/80 border-b border-[var(--gray-200)] sticky top-0 z-40 backdrop-blur-xl">
         {/* 顶部装饰线 */}
         <div className="h-px bg-gradient-to-r from-transparent via-[var(--accent)] to-transparent opacity-40" />
         
@@ -162,7 +162,7 @@ export default function DashboardLayout({
       </nav>
 
       {/* 主内容 - 移动端全屏 */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-24 sm:pb-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-3 pb-24 md:pt-12 md:pb-12">
         {children}
       </main>
 

@@ -126,23 +126,26 @@ export default function WardrobesPage() {
     <Fragment>
       <PullToRefresh onRefresh={handleRefresh}>
         <div className="space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs tracking-[0.3em] uppercase text-[var(--accent-dark)] font-medium mb-3">
-              MY COLLECTION
-            </p>
-            <h1 className="text-display text-5xl text-[var(--gray-900)]">
-              我的衣橱
-            </h1>
-            <div className="h-px w-24 bg-gradient-to-r from-[var(--accent)] to-transparent mt-4" />
-          </div>
+        <div className="md:static sticky top-0 z-30 bg-[var(--background)] md:bg-transparent pb-4 md:pb-0 -mx-4 px-4 md:mx-0 md:px-0 md:mb-8 border-b md:border-b-0 border-[var(--gray-200)]">
+          <div className="flex items-center justify-between pt-0 md:pt-0">
+            <div>
+              <p className="text-[10px] md:text-xs tracking-[0.3em] uppercase text-[var(--accent-dark)] font-medium mb-2 md:mb-3">
+                MY COLLECTION
+              </p>
+              <h1 className="text-display text-3xl md:text-5xl text-[var(--gray-900)]">
+                我的衣橱
+              </h1>
+              <div className="h-px w-16 md:w-24 bg-gradient-to-r from-[var(--accent)] to-transparent mt-3 md:mt-4" />
+            </div>
           <Button
-            variant="primary"
-            size="lg"
+            variant="secondary"
+            size="sm"
             onClick={() => setIsCreateModalOpen(true)}
+            className="md:!px-8 md:!py-3.5 md:!text-lg md:!min-h-[56px]"
           >
             + 新建衣橱
           </Button>
+          </div>
         </div>
 
       {wardrobes.length === 0 ? (
@@ -220,7 +223,7 @@ export default function WardrobesPage() {
         }}
         title="创建新衣橱"
       >
-        <div className="space-y-5">
+        <div className="space-y-5 h-full flex flex-col">
           <Input
             label="衣橱名称"
             value={newWardrobeName}
@@ -235,35 +238,46 @@ export default function WardrobesPage() {
           />
           
           {/* 封面选择 */}
-          <div>
+          <div className="flex flex-col">
             <label className="block text-sm font-medium text-[var(--gray-900)] mb-3 tracking-wide">
               选择封面（可选）
             </label>
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-3 max-h-[300px] overflow-y-auto p-1">
-              {/* 预设封面 */}
-              {COVER_IMAGES.map((image, index) => (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => setSelectedAvatar(image)}
-                  className={`aspect-video rounded-[var(--radius-lg)] border transition-all overflow-hidden ${
-                    selectedAvatar === image
-                      ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]/30 scale-105'
-                      : 'border-[var(--gray-300)] hover:border-[var(--accent-light)]'
-                  }`}
-                  style={{ transition: 'all var(--transition-smooth)' }}
-                >
-                  <img
-                    src={image}
-                    alt={`封面 ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
-                </button>
-              ))}
+            <div className="overflow-y-auto -mx-6 px-6 sm:mx-0 sm:px-0 max-h-[45vh] sm:max-h-[400px]">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 sm:gap-3 pb-4">
+                {/* 预设封面 */}
+                {COVER_IMAGES.map((image, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => setSelectedAvatar(image)}
+                    className={`aspect-square rounded-[var(--radius-md)] sm:rounded-[var(--radius-lg)] border-2 transition-all overflow-hidden relative ${
+                      selectedAvatar === image
+                        ? 'border-[var(--accent)] ring-2 ring-[var(--accent)]/30'
+                        : 'border-[var(--gray-300)] hover:border-[var(--accent-light)]'
+                    }`}
+                    style={{ transition: 'all var(--transition-smooth)' }}
+                  >
+                    <img
+                      src={image}
+                      alt={`封面 ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    {selectedAvatar === image && (
+                      <div className="absolute inset-0 bg-[var(--accent)]/10 flex items-center justify-center">
+                        <div className="w-6 h-6 rounded-full bg-[var(--accent)] flex items-center justify-center">
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </div>
+                      </div>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
           
-          <div className="flex justify-end gap-4 pt-6 border-t border-[var(--gray-200)]">
+          <div className="flex gap-3 pt-5 pb-2 mt-4 border-t border-[var(--gray-200)] -mx-6 px-6 sm:mx-0 sm:px-0 bg-[var(--card-bg)] sm:static">
             <Button
               variant="ghost"
               onClick={() => {
@@ -271,15 +285,17 @@ export default function WardrobesPage() {
                 setNewWardrobeName('')
                 setSelectedAvatar(DEFAULT_AVATAR)
               }}
+              className="flex-1 sm:flex-none"
             >
               取消
             </Button>
             <Button
-              variant="primary"
+              variant="secondary"
               size="lg"
               onClick={handleCreateWardrobe}
               isLoading={createWardrobeMutation.isPending}
               disabled={!newWardrobeName.trim()}
+              className="flex-1 sm:flex-none"
             >
               创建
             </Button>
