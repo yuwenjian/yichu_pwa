@@ -92,6 +92,7 @@ export default function OutfitCanvasModal({
     })
   }
 
+  // 初始化 canvas
   useEffect(() => {
     if (isOpen && isFabricReady && canvasRef.current && !fabricCanvasRef.current) {
       const containerWidth = Math.min(window.innerWidth - 64, 500)
@@ -99,14 +100,11 @@ export default function OutfitCanvasModal({
       const canvas = new window.fabric.Canvas(canvasRef.current, {
         width: containerWidth,
         height: containerWidth,
-        backgroundColor: '#FFFFFF',
+        backgroundColor: backgroundColor,
       })
 
       fabricCanvasRef.current = canvas
-
-      setTimeout(() => {
-        loadClothings(canvas, clothings)
-      }, 200)
+      // 不在这里加载衣物，统一由下面的 useEffect 处理
     }
 
     return () => {
@@ -118,6 +116,7 @@ export default function OutfitCanvasModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, isFabricReady])
 
+  // 加载和更新衣物
   useEffect(() => {
     if (isOpen && fabricCanvasRef.current && clothings.length > 0) {
       const canvas = fabricCanvasRef.current
@@ -196,36 +195,41 @@ export default function OutfitCanvasModal({
         size="xl"
       >
         <div className="flex flex-col md:flex-row gap-6">
-          <div className="flex-1 flex flex-col items-center bg-gray-50 rounded-xl overflow-hidden p-4 border-2 border-gray-200">
-            <div className="relative shadow-xl">
+          {/* 画布区域 - Editorial 风格 */}
+          <div className="flex-1 flex flex-col items-center bg-[var(--background)] rounded-[var(--radius-xl)] overflow-hidden p-6 border border-[var(--gray-200)]">
+            <div className="relative shadow-[var(--shadow-elevated)] rounded-lg overflow-hidden">
               {!isFabricReady ? (
                 <div className="w-[300px] h-[300px] sm:w-[500px] sm:h-[500px] flex items-center justify-center bg-white">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--primary)]"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]"></div>
                 </div>
               ) : (
                 <canvas ref={canvasRef} />
               )}
               {isLoading && (
-                <div className="absolute inset-0 flex items-center justify-center bg-white/50">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--primary)]"></div>
+                <div className="absolute inset-0 flex items-center justify-center bg-white/70 backdrop-blur-sm">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[var(--accent)]"></div>
                 </div>
               )}
             </div>
-            <p className="mt-4 text-xs text-gray-400">
+            <p className="mt-4 text-xs text-[var(--gray-600)] tracking-wide">
               {clothings.length} 件衣物已加载
             </p>
           </div>
 
+          {/* 控制面板 - Editorial 风格 */}
           <div className="w-full md:w-72 space-y-6">
+            {/* 背景颜色 */}
             <div>
-              <h3 className="text-sm font-semibold text-[#1a1a1a] mb-3">背景颜色</h3>
-              <div className="grid grid-cols-4 gap-2">
+              <h3 className="text-sm font-medium text-[var(--gray-900)] mb-3 tracking-wide uppercase">背景颜色</h3>
+              <div className="grid grid-cols-4 gap-2.5">
                 {PRESET_BACKGROUNDS.map((color) => (
                   <button
                     key={color}
                     onClick={() => changeBgColor(color)}
-                    className={`aspect-square rounded-full border-2 transition-all shadow-sm ${
-                      backgroundColor === color ? 'border-[var(--primary)] scale-110 ring-2 ring-[var(--primary)] ring-opacity-20' : 'border-gray-200 hover:border-gray-300'
+                    className={`aspect-square rounded-full border-2 transition-all duration-300 shadow-sm hover:shadow-md ${
+                      backgroundColor === color 
+                        ? 'border-[var(--accent)] scale-110 ring-2 ring-[var(--accent)]/30' 
+                        : 'border-[var(--gray-300)] hover:border-[var(--accent)]/50'
                     }`}
                     style={{ backgroundColor: color }}
                     title={color}
@@ -234,40 +238,74 @@ export default function OutfitCanvasModal({
               </div>
             </div>
 
-            <div>
-              <h3 className="text-sm font-semibold text-[#1a1a1a] mb-3">图层操作</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <Button variant="outline" size="sm" onClick={bringToFront} className="text-xs !text-[#4a4a4a] !border-gray-300 hover:!bg-gray-50">
+            {/* 图层操作 */}
+            <div className="border-t border-[var(--gray-200)] pt-6">
+              <h3 className="text-sm font-medium text-[var(--gray-900)] mb-3 tracking-wide uppercase">图层操作</h3>
+              <div className="grid grid-cols-2 gap-2.5">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={bringToFront}
+                  className="!text-xs"
+                >
                   置于顶层
                 </Button>
-                <Button variant="outline" size="sm" onClick={sendToBack} className="text-xs !text-[#4a4a4a] !border-gray-300 hover:!bg-gray-50">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={sendToBack}
+                  className="!text-xs"
+                >
                   置于底层
                 </Button>
-                <Button variant="outline" size="sm" onClick={deleteSelected} className="text-xs !text-red-600 !border-red-100 hover:!bg-red-50">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={deleteSelected}
+                  className="!text-xs !text-[var(--error)] !border-[var(--error)]/30 hover:!bg-[var(--error)]/5"
+                >
                   删除选中
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => {
-                  if (fabricCanvasRef.current) {
-                    fabricCanvasRef.current.clear()
-                    fabricCanvasRef.current.setBackgroundColor(backgroundColor, () => {
-                      loadClothings(fabricCanvasRef.current, clothings)
-                    })
-                  }
-                }} className="text-xs !text-[#4a4a4a] !border-gray-300 hover:!bg-gray-50">
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => {
+                    if (fabricCanvasRef.current) {
+                      fabricCanvasRef.current.clear()
+                      fabricCanvasRef.current.setBackgroundColor(backgroundColor, () => {
+                        loadClothings(fabricCanvasRef.current, clothings)
+                      })
+                    }
+                  }}
+                  className="!text-xs"
+                >
                   重置画布
                 </Button>
               </div>
             </div>
 
-            <div className="pt-6 border-t border-gray-100">
-              <p className="text-xs text-gray-400 mb-4 leading-relaxed">
-                提示：您可以点击并拖动衣物图片来移动位置，使用边框角进行缩放和旋转。
-              </p>
-              <div className="flex gap-2">
-                <Button variant="ghost" className="flex-1 !text-[#4a4a4a] hover:!bg-gray-100" onClick={onClose}>
+            {/* 提示和操作按钮 */}
+            <div className="pt-6 border-t border-[var(--gray-200)]">
+              <div className="p-4 bg-[var(--accent)]/5 rounded-[var(--radius-lg)] border border-[var(--accent)]/20 mb-4">
+                <p className="text-xs text-[var(--gray-700)] leading-relaxed">
+                  <span className="text-[var(--accent)] font-medium">💡 提示：</span>
+                  您可以点击并拖动衣物图片来移动位置，使用边框角进行缩放和旋转。
+                </p>
+              </div>
+              <div className="flex gap-3">
+                <Button 
+                  variant="ghost" 
+                  className="flex-1" 
+                  onClick={onClose}
+                >
                   取消
                 </Button>
-                <Button variant="primary" className="flex-1 shadow-md hover:shadow-lg transition-shadow" onClick={handleSave} disabled={isLoading || !isFabricReady}>
+                <Button 
+                  variant="secondary" 
+                  className="flex-1" 
+                  onClick={handleSave} 
+                  disabled={isLoading || !isFabricReady}
+                >
                   确认完成
                 </Button>
               </div>

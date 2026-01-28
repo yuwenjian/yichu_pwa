@@ -252,18 +252,18 @@ export default function OutfitsPage() {
                   {/* 悬浮显示的标签和季节 */}
                   <div className="absolute top-3 left-3 flex flex-wrap gap-1.5 max-w-[80%]">
                     {outfit.seasons?.map(s => (
-                      <span key={s} className="px-2.5 py-1 bg-[var(--primary)]/90 text-white text-xs rounded-[var(--radius-md)] backdrop-blur-sm font-medium">
+                      <span key={s} className="px-2.5 py-1 bg-[var(--primary)]/90 text-white text-xs rounded-[var(--radius-md)] backdrop-blur-sm font-medium border border-white/30 shadow-sm">
                         {s}
                       </span>
                     ))}
                     {outfit.tags?.map(t => (
-                      <span key={t} className="px-2.5 py-1 bg-[var(--accent)]/90 text-white text-xs rounded-[var(--radius-md)] backdrop-blur-sm font-medium">
+                      <span key={t} className="px-2.5 py-1 bg-[var(--accent)]/90 text-white text-xs rounded-[var(--radius-md)] backdrop-blur-sm font-medium border border-white/30 shadow-sm">
                         {t}
                       </span>
                     ))}
                   </div>
                   {outfit.is_template && (
-                    <div className="absolute top-3 right-3 px-2.5 py-1 bg-[var(--primary)] text-white text-xs rounded-[var(--radius-md)] font-medium">
+                    <div className="absolute top-3 right-3 px-2.5 py-1 bg-[var(--primary)] text-white text-xs rounded-[var(--radius-md)] font-medium border border-white/30 shadow-sm">
                       模板
                     </div>
                   )}
