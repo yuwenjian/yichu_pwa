@@ -121,22 +121,6 @@ export default function RecommendationsPage() {
     }
   }
 
-  // 清除缓存并允许重新扫描
-  const handleClearCache = () => {
-    if (!selectedWardrobeId) return
-    
-    const storageKey = `ai_recommendations_${selectedWardrobeId}`
-    const lastScanKey = `ai_last_scan_${selectedWardrobeId}`
-    
-    localStorage.removeItem(storageKey)
-    localStorage.removeItem(lastScanKey)
-    
-    setRecommendations([])
-    setLastScanDate(null)
-    setCanScanToday(true)
-    
-    console.log('✅ 缓存已清除，可以重新扫描')
-  }
 
   // 执行 AI 扫描
   const handleAIScan = async () => {
@@ -272,46 +256,40 @@ export default function RecommendationsPage() {
         </div>
 
         {/* AI 扫描按钮 */}
-        <Card className="p-6 border-2 border-[var(--accent)]/30 bg-gradient-to-br from-[var(--accent)]/5 to-transparent">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-start gap-4 flex-1">
-              <div className="w-12 h-12 rounded-full bg-[var(--accent)]/20 flex items-center justify-center flex-shrink-0">
-                <svg className="w-6 h-6 text-[var(--accent)]" fill="currentColor" viewBox="0 0 20 20">
+        <Card className="p-4 md:p-6 border-2 border-[var(--accent)]/30 bg-gradient-to-br from-[var(--accent)]/5 to-transparent">
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+            {/* 左侧信息区 */}
+            <div className="flex items-start gap-3 md:gap-4 flex-1">
+              <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[var(--accent)]/20 flex items-center justify-center flex-shrink-0">
+                <svg className="w-5 h-5 md:w-6 md:h-6 text-[var(--accent)]" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3zM6 8a2 2 0 11-4 0 2 2 0 014 0zM16 18v-3a5.972 5.972 0 00-.75-2.906A3.005 3.005 0 0119 15v3h-3zM4.75 12.094A5.973 5.973 0 004 15v3H1v-3a3 3 0 013.75-2.906z" />
                 </svg>
               </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-medium mb-2 text-[var(--gray-900)]">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base md:text-lg font-medium mb-1 md:mb-2 text-[var(--gray-900)]">
                   🤖 AI 智能分析
                 </h3>
-                <p className="text-sm text-[var(--gray-600)] mb-2">
+                <p className="text-xs md:text-sm text-[var(--gray-600)] mb-1 md:mb-2">
                   由 DeepSeek 提供支持，基于您的衣橱数据生成个性化建议
                 </p>
                 {lastScanDate && (
-                  <p className="text-xs text-[var(--gray-500)]">
+                  <p className="text-[10px] md:text-xs text-[var(--gray-500)]">
                     上次扫描：{formatScanDate(lastScanDate)}
                   </p>
                 )}
               </div>
             </div>
-            <div className="flex gap-2">
-              {/* 清除缓存按钮 - 只在有缓存时显示 */}
-              {recommendations.length > 0 && (
-                <Button
-                  onClick={handleClearCache}
-                  variant="outline"
-                  className="whitespace-nowrap"
-                  title="清除缓存并允许重新扫描"
-                >
-                  清除缓存
-                </Button>
-              )}
-              
-              {/* 扫描按钮 */}
+            
+            {/* 右侧按钮区 */}
+            <div className="flex justify-end md:justify-start">
               <Button
                 onClick={handleAIScan}
                 disabled={!canScanToday || isScanning}
-                className={`whitespace-nowrap ${!canScanToday ? 'opacity-50 cursor-not-allowed' : ''}`}
+                size="sm"
+                className={`
+                  w-full md:w-auto
+                  ${!canScanToday ? 'opacity-50 cursor-not-allowed' : ''}
+                `}
               >
                 {isScanning ? (
                   <>
@@ -431,7 +409,11 @@ export default function RecommendationsPage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[var(--accent)] mt-1">•</span>
-                  <span>建议分为高、中、低三个优先级，建议优先处理高优先级项目</span>
+                  <span>每个衣橱每天只能进行一次 AI 分析，建议优先处理高优先级项目</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-[var(--accent)] mt-1">•</span>
+                  <span>建议分为高、中、低三个优先级，今日分析结果会保留到次日自动刷新</span>
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-[var(--accent)] mt-1">•</span>
