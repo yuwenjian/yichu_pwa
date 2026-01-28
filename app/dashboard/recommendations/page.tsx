@@ -121,6 +121,23 @@ export default function RecommendationsPage() {
     }
   }
 
+  // 清除缓存并允许重新扫描
+  const handleClearCache = () => {
+    if (!selectedWardrobeId) return
+    
+    const storageKey = `ai_recommendations_${selectedWardrobeId}`
+    const lastScanKey = `ai_last_scan_${selectedWardrobeId}`
+    
+    localStorage.removeItem(storageKey)
+    localStorage.removeItem(lastScanKey)
+    
+    setRecommendations([])
+    setLastScanDate(null)
+    setCanScanToday(true)
+    
+    console.log('✅ 缓存已清除，可以重新扫描')
+  }
+
   // 执行 AI 扫描
   const handleAIScan = async () => {
     if (!selectedWardrobeId || !canScanToday) return
@@ -277,25 +294,40 @@ export default function RecommendationsPage() {
                 )}
               </div>
             </div>
-            <Button
-              onClick={handleAIScan}
-              disabled={!canScanToday || isScanning}
-              className={`whitespace-nowrap ${!canScanToday ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {isScanning ? (
-                <>
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  分析中...
-                </>
-              ) : canScanToday ? (
-                '开始扫描'
-              ) : (
-                '今日已扫描'
+            <div className="flex gap-2">
+              {/* 清除缓存按钮 - 只在有缓存时显示 */}
+              {recommendations.length > 0 && (
+                <Button
+                  onClick={handleClearCache}
+                  variant="outline"
+                  className="whitespace-nowrap"
+                  title="清除缓存并允许重新扫描"
+                >
+                  清除缓存
+                </Button>
               )}
-            </Button>
+              
+              {/* 扫描按钮 */}
+              <Button
+                onClick={handleAIScan}
+                disabled={!canScanToday || isScanning}
+                className={`whitespace-nowrap ${!canScanToday ? 'opacity-50 cursor-not-allowed' : ''}`}
+              >
+                {isScanning ? (
+                  <>
+                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    分析中...
+                  </>
+                ) : canScanToday ? (
+                  '开始扫描'
+                ) : (
+                  '今日已扫描'
+                )}
+              </Button>
+            </div>
           </div>
         </Card>
 
@@ -339,16 +371,29 @@ export default function RecommendationsPage() {
                       <p className="text-[var(--gray-700)] mb-4 whitespace-pre-line">{rec.description}</p>
                       {rec.actions && rec.actions.length > 0 && (
                         <div className="flex gap-3">
-                          {rec.actions.map((action, actionIndex) => (
-                            <Button
-                              key={actionIndex}
-                              variant="outline"
-                              size="sm"
-                              onClick={() => router.push(action.link)}
-                            >
-                              {action.label}
-                            </Button>
-                          ))}
+                          {rec.actions.map((action, actionIndex) => {
+                            // 动态替换链接中的占位符
+                            let link = action.link
+                            if (link === '/dashboard/wardrobes' && selectedWardrobeId) {
+                              // 如果是跳转到衣橱，且是购物建议，直接跳转到当前衣橱的添加页面
+                              if (rec.type === 'shopping') {
+                                link = `/dashboard/wardrobes/${selectedWardrobeId}/clothings/new`
+                              } else {
+                                link = `/dashboard/wardrobes/${selectedWardrobeId}/clothings`
+                              }
+                            }
+                            
+                            return (
+                              <Button
+                                key={actionIndex}
+                                variant="outline"
+                                size="sm"
+                                onClick={() => router.push(link)}
+                              >
+                                {action.label}
+                              </Button>
+                            )
+                          })}
                         </div>
                       )}
                     </div>

@@ -284,13 +284,13 @@ export function convertToAIRecommendations(
     const generateLink = (type: string): string => {
       switch (type) {
         case 'shopping':
-          return '/dashboard/clothings/new'
+          return '/dashboard/wardrobes' // 跳转到衣橱页面，用户选择衣橱后再添加
         case 'outfit':
           return '/dashboard/outfits/new'
         case 'usage':
           return '/dashboard/statistics'
         case 'organization':
-          return '/dashboard/clothings'
+          return '/dashboard/wardrobes' // 跳转到衣橱页面
         case 'style':
           return '/dashboard/analysis'
         default:
