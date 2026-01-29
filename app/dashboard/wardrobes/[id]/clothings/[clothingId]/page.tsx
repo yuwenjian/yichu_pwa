@@ -221,7 +221,10 @@ export default function ClothingDetailPage() {
         {/* 图片 */}
         <Card className="p-0 overflow-hidden">
           <div 
-            className="aspect-square bg-[var(--gray-100)] relative cursor-zoom-in group"
+            className="aspect-square relative cursor-zoom-in group"
+            style={{ 
+              background: 'linear-gradient(rgba(128, 128, 128, 0.1), rgba(128, 128, 128, 0.1)), #d4b896'
+            }}
             onClick={() => clothing.image_url && setIsImagePreviewOpen(true)}
           >
             {clothing.image_url ? (

@@ -286,8 +286,11 @@ export default function WardrobeDetailPage() {
                       {categoryClothings.slice(0, 6).map((clothing) => (
                         <div
                           key={clothing.id}
-                          className="aspect-square bg-[var(--gray-100)] rounded-[var(--radius-lg)] overflow-hidden cursor-pointer hover:scale-105 transition-all shadow-[var(--shadow-subtle)] hover:shadow-[var(--shadow-soft)]"
-                          style={{ transition: 'all var(--transition-smooth)' }}
+                          className="aspect-square rounded-[var(--radius-lg)] overflow-hidden cursor-pointer hover:scale-105 transition-all shadow-[var(--shadow-subtle)] hover:shadow-[var(--shadow-soft)]"
+                          style={{ 
+                            background: 'linear-gradient(rgba(128, 128, 128, 0.1), rgba(128, 128, 128, 0.1)), #d4b896',
+                            transition: 'all var(--transition-smooth)' 
+                          }}
                           onClick={(e) => {
                             e.stopPropagation()
                             router.push(`/dashboard/wardrobes/${wardrobeId}/clothings/${clothing.id}`)
@@ -297,7 +300,7 @@ export default function WardrobeDetailPage() {
                             <img
                               src={clothing.image_url}
                               alt={clothing.name || '衣物'}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-contain"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center bg-[var(--gray-200)]">

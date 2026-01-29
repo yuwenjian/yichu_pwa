@@ -100,7 +100,17 @@ export default function EditClothingPage() {
       let processedBlob: Blob
       
       if (removeBg) {
-        processedBlob = await removeBackground(file, { backgroundColor: '#FFFFFF' })
+        console.log('使用 AI 智能抠图处理图片...')
+        processedBlob = await removeBackground(file, { 
+          backgroundColor: 'transparent', // 改用透明背景效果更好
+          maxSize: 800, // 衣物图片不需要太高分辨率
+          edgeBlur: 7, // 适度羽化，边缘更自然
+          useAI: true, // 使用 AI 模型（效果最好）
+          threshold: 80, // 色差阈值（回退方案使用）
+          onProgress: (progress) => {
+            console.log(`处理进度: ${progress}%`)
+          }
+        })
       } else {
         processedBlob = file
       }
@@ -307,12 +317,22 @@ export default function EditClothingPage() {
             {processedImage && (
               <div>
                 <p className="text-sm text-[var(--gray-600)] mb-2">新图片预览</p>
-                <div className="aspect-square bg-[var(--gray-100)] rounded-[var(--radius-lg)] overflow-hidden shadow-[var(--shadow-subtle)]">
+                <div 
+                  className="aspect-square rounded-[var(--radius-lg)] overflow-hidden shadow-[var(--shadow-subtle)] relative"
+                  style={{ 
+                    background: 'linear-gradient(rgba(128, 128, 128, 0.1), rgba(128, 128, 128, 0.1)), #d4b896'
+                  }}
+                >
                   <img
                     src={processedImage}
                     alt="预览"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-contain"
                   />
+                  {removeBg && (
+                    <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                      已去背景
+                    </div>
+                  )}
                 </div>
               </div>
             )}

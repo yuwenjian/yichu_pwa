@@ -74,12 +74,15 @@ export default function NewClothingPage() {
         let processedBlob: Blob
         
         if (removeBg) {
-          console.log('✅ removeBg = true, 将执行抠图')
+          console.log('✅ removeBg = true, 将执行 AI 智能抠图')
           // 执行抠图（带进度回调）
           console.log(`开始处理图片 ${i + 1}/${files.length}:`, file.name)
           processedBlob = await removeBackground(file, { 
             backgroundColor: 'transparent', // 使用透明背景
-            maxSize: 1024, // 限制最大尺寸以加快速度
+            maxSize: 800, // 衣物图片不需要太高分辨率
+            edgeBlur: 7, // 适度羽化，边缘更自然
+            useAI: true, // 使用 AI 模型（效果最好）
+            threshold: 80, // 色差阈值（回退方案使用）
             onProgress: (progress) => {
               // 计算总体进度
               const totalProgress = ((i / files.length) * 100) + (progress / files.length)
@@ -126,7 +129,7 @@ export default function NewClothingPage() {
       // 上传每张图片
       for (let i = 0; i < selectedFiles.length; i++) {
         const file = selectedFiles[i]
-        let fileToUpload: File | Blob = file
+        let fileToUpload: File = file
 
         // 如果选择了抠图，使用处理后的图片
         if (removeBg && processedBlobs[i]) {
@@ -302,12 +305,23 @@ export default function NewClothingPage() {
             {processedImages.length > 0 && (
               <div className="grid grid-cols-2 gap-3">
                 {processedImages.map((url, index) => (
-                  <div key={index} className="aspect-square bg-[var(--gray-100)] rounded-[var(--radius-lg)] overflow-hidden shadow-[var(--shadow-subtle)]">
+                  <div 
+                    key={index} 
+                    className="aspect-square rounded-[var(--radius-lg)] overflow-hidden shadow-[var(--shadow-subtle)] relative"
+                    style={{ 
+                      background: 'linear-gradient(rgba(128, 128, 128, 0.1), rgba(128, 128, 128, 0.1)), #d4b896'
+                    }}
+                  >
                     <img
                       src={url}
                       alt={`预览 ${index + 1}`}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                     />
+                    {removeBg && (
+                      <div className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                        已去背景
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
