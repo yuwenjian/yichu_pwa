@@ -223,7 +223,9 @@ export default function ClothingDetailPage() {
           <div 
             className="aspect-square relative cursor-zoom-in group"
             style={{ 
-              background: 'linear-gradient(rgba(128, 128, 128, 0.1), rgba(128, 128, 128, 0.1)), #d4b896'
+              background: clothing.has_transparent_bg
+                ? 'linear-gradient(rgba(128, 128, 128, 0.1), rgba(128, 128, 128, 0.1)), #d4b896'
+                : 'transparent'
             }}
             onClick={() => clothing.image_url && setIsImagePreviewOpen(true)}
           >
@@ -232,7 +234,9 @@ export default function ClothingDetailPage() {
                 <img
                   src={clothing.image_url}
                   alt={clothing.name || '衣物'}
-                  className="w-full h-full object-contain transition-all duration-300 group-hover:scale-[1.02]"
+                  className={`w-full h-full transition-all duration-300 group-hover:scale-[1.02] ${
+                    clothing.has_transparent_bg ? 'object-contain' : 'object-cover'
+                  }`}
                 />
                 {/* 右下角微妙的放大提示 */}
                 <div className="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300">

@@ -166,20 +166,27 @@ export default function EditClothingPage() {
       }
 
       // 更新衣物信息
+      const updateData: any = {
+        category_id: categoryId,
+        name: name || null,
+        image_url: imageUrl,
+        colors,
+        seasons,
+        brand: brand || null,
+        price: price ? parseFloat(price) : null,
+        purchase_date: purchaseDate || null,
+        status,
+        notes: notes || null,
+      }
+
+      // 如果上传了新图片，更新去背景标记
+      if (selectedFile) {
+        updateData.has_transparent_bg = removeBg
+      }
+
       const { error } = await supabase
         .from('clothings')
-        .update({
-          category_id: categoryId,
-          name: name || null,
-          image_url: imageUrl,
-          colors,
-          seasons,
-          brand: brand || null,
-          price: price ? parseFloat(price) : null,
-          purchase_date: purchaseDate || null,
-          status,
-          notes: notes || null,
-        })
+        .update(updateData)
         .eq('id', clothingId)
 
       if (error) throw error

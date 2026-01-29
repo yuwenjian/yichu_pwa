@@ -237,14 +237,18 @@ export default function ClothingsPage() {
               <div 
                 className="aspect-square relative overflow-hidden" 
                 style={{ 
-                  background: 'linear-gradient(rgba(128, 128, 128, 0.1), rgba(128, 128, 128, 0.1)), #d4b896'
+                  background: clothing.has_transparent_bg 
+                    ? 'linear-gradient(rgba(128, 128, 128, 0.1), rgba(128, 128, 128, 0.1)), #d4b896'
+                    : 'transparent'
                 }}
               >
                 {clothing.image_url ? (
                   <img
                     src={clothing.image_url}
                     alt={clothing.name || '衣物'}
-                    className="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
+                    className={`w-full h-full group-hover:scale-110 transition-transform duration-500 ${
+                      clothing.has_transparent_bg ? 'object-contain' : 'object-cover'
+                    }`}
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-4xl text-[var(--gray-400)]">

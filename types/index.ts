@@ -45,6 +45,7 @@ export interface Clothing {
   use_count: number
   last_used_at?: string
   notes?: string
+  has_transparent_bg?: boolean // 是否使用了去背景功能
   sort_order: number
   created_at: string
   updated_at: string

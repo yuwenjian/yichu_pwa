@@ -180,6 +180,7 @@ export default function NewClothingPage() {
               purchase_date: purchaseDate || undefined,
               status,
               notes: notes || undefined,
+              has_transparent_bg: removeBg, // 记录是否使用了去背景功能
             },
           ])
 
