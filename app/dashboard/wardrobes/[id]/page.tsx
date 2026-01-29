@@ -9,6 +9,7 @@ import Button from '@/components/ui/Button'
 import Modal from '@/components/ui/Modal'
 import Input from '@/components/ui/Input'
 import PullToRefresh from '@/components/ui/PullToRefresh'
+import DraggableFAB from '@/components/ui/DraggableFAB'
 import { cn } from '@/utils/cn'
 
 // 预设封面图片列表
@@ -332,17 +333,18 @@ export default function WardrobeDetailPage() {
         )}
       </div>
 
-      {/* 浮动添加按钮 - Editorial风格 */}
-      <button
-        onClick={() => router.push(`/dashboard/wardrobes/${wardrobeId}/clothings/new`)}
-        className="fixed bottom-20 right-4 sm:hidden z-40 w-14 h-14 bg-[var(--accent-dark)] text-white rounded-full shadow-[var(--shadow-elevated)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
-        style={{ transition: 'all var(--transition-smooth)' }}
-        aria-label="添加衣物"
-      >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
-        </svg>
-      </button>
+      {/* 可拖动的浮动添加按钮 - 仅移动端显示 */}
+      <div className="sm:hidden">
+        <DraggableFAB
+          onClick={() => router.push(`/dashboard/wardrobes/${wardrobeId}/clothings/new`)}
+          ariaLabel="添加衣物"
+          icon={
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+            </svg>
+          }
+        />
+      </div>
       </div>
 
       {/* 创建分类模态框 - 移动端优化 */}
