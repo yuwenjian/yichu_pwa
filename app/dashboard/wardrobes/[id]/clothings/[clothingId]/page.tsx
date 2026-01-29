@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Fragment } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { useClothing, useIncrementClothingUseCount } from '@/lib/hooks/useClothingsQuery'
 import type { Clothing, Category } from '@/types'
@@ -15,6 +16,7 @@ import { useConfirm, useToast } from '@/hooks/useDialog'
 export default function ClothingDetailPage() {
   const params = useParams()
   const router = useRouter()
+  const queryClient = useQueryClient()
   const wardrobeId = params.id as string
   const clothingId = params.clothingId as string
 
@@ -82,9 +84,14 @@ export default function ClothingDetailPage() {
 
       if (error) throw error
 
+      // 清除相关的查询缓存，确保返回后数据是最新的
+      queryClient.invalidateQueries({ queryKey: ['wardrobe', wardrobeId] })
+      queryClient.invalidateQueries({ queryKey: ['clothings'] })
+      queryClient.removeQueries({ queryKey: ['clothing', clothingId] })
+
       toast.success('删除成功')
       setTimeout(() => {
-        router.push(`/dashboard/wardrobes/${wardrobeId}/clothings`)
+        router.back() // 返回上一页，无论从哪里进入都返回来源页面
       }, 500)
     } catch (error) {
       console.error('Error deleting clothing:', error)

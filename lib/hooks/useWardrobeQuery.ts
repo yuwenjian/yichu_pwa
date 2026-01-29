@@ -44,6 +44,8 @@ export function useWardrobe(wardrobeId: string | undefined) {
       }
     },
     enabled: !!wardrobeId,
+    refetchOnMount: 'always', // 确保每次进入页面都刷新数据
+    staleTime: 0, // 数据立即过期，确保总是获取最新数据
   })
 }
 
